@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Board from "../components/Board";
+import { calculateLegalMoves } from "../game/game";
 import { Grid } from "../types";
 
 const START_BOARD: Grid = [
@@ -15,6 +16,9 @@ const START_BOARD: Grid = [
 ];
 
 const Home: NextPage = () => {
+  console.log(
+    calculateLegalMoves({ board: START_BOARD, currentPlayer: "White" })
+  );
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">
       <Head>
