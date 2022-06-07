@@ -46,11 +46,11 @@ function findJumpMoves(board: Grid, [x, y]: Coordinates): Move[] {
       const [jx, jy] = [dx * 2, dy * 2];
       if (!isInBounds([x + jx, y + jy])) return;
       if (
-        !posInPath(path, [y + jy, x + jx]) &&
+        !posInPath(path, [x + jx, y + jy]) &&
         board[y + dy][x + dx] !== null &&
         board[y + jy][x + jx] === null
       ) {
-        findMoves([x + jx, y + jy], [...seen, [y + jy, x + jx]]);
+        findMoves([x + jx, y + jy], [...seen, [x + jx, y + jy]]);
         jumpMoves.push({
           start: [x, y],
           end: [x + jx, y + jy],
