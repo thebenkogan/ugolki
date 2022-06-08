@@ -13,4 +13,5 @@ export type Grid = Array<Array<Player | null>>;
 export type Game = {
   board: Grid;
   currentPlayer: Player;
+  moves: Move[];
 };
