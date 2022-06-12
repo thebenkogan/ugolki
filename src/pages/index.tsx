@@ -6,7 +6,7 @@ import { initializeGame } from "../game/game";
 import { Game } from "../types";
 
 const Home: NextPage = () => {
-  const [game, setGame] = React.useState<Game>(initializeGame());
+  const [game, setGame] = React.useState<Game>(initializeGame("Black"));
 
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">

@@ -1,15 +1,15 @@
-import { Game, Grid, Move } from "../types";
+import { Game, Grid, Move, Player } from "../types";
 import { calculateLegalMoves } from "./moves";
 
-const START_BOARD: Grid = [
-  ["Black", "Black", "Black", "Black", null, null, null, null],
-  ["Black", "Black", "Black", "Black", null, null, null, null],
-  ["Black", "Black", "Black", "Black", null, null, null, null],
-  ["Black", "Black", "Black", "Black", null, null, null, null],
-  [null, null, null, null, "White", "White", "White", "White"],
-  [null, null, null, null, "White", "White", "White", "White"],
-  [null, null, null, null, "White", "White", "White", "White"],
-  [null, null, null, null, "White", "White", "White", "White"],
+const startBoard = (player: Player, opp: Player) => [
+  [opp, opp, opp, opp, null, null, null, null],
+  [opp, opp, opp, opp, null, null, null, null],
+  [opp, opp, opp, opp, null, null, null, null],
+  [opp, opp, opp, opp, null, null, null, null],
+  [null, null, null, null, player, player, player, player],
+  [null, null, null, null, player, player, player, player],
+  [null, null, null, null, player, player, player, player],
+  [null, null, null, null, player, player, player, player],
 ];
 
 export function playMove(game: Game, move: Move): Game {
@@ -22,10 +22,12 @@ export function playMove(game: Game, move: Move): Game {
   };
 }
 
-export function initializeGame(): Game {
+export function initializeGame(player: Player): Game {
+  const opp = player === "White" ? "Black" : "White";
+  const board = startBoard(player, opp);
   return {
-    board: START_BOARD,
-    currentPlayer: "White",
-    moves: calculateLegalMoves(START_BOARD, "White"),
+    board: board,
+    currentPlayer: player,
+    moves: calculateLegalMoves(board, player),
   };
 }
