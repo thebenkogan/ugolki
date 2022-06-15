@@ -6,9 +6,13 @@ import { initializeGame } from "../../game/game";
 import { Game } from "../../types";
 import { firestore } from "../../../firebase/clientApp";
 import { collection, getDocs } from "firebase/firestore";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const [game, setGame] = React.useState<Game>(initializeGame("Black"));
+
+  const router = useRouter();
+  const { code } = router.query;
 
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">

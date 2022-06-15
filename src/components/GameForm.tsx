@@ -1,6 +1,6 @@
 import React from "react";
 import { firestore } from "../../firebase/clientApp";
-import { collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
 
 const gamesCollection = collection(firestore, "games");
@@ -25,13 +25,31 @@ function GameForm(): JSX.Element {
     router.push(`games/${code}`);
   };
 
-  const handleCreate = (): void => {};
+  const handleCreate = async () => {
+    setError("");
+
+    const games = await getDocs(gamesCollection);
+    let newCode = "";
+
+    const generateCode = () => {
+      newCode = ("" + Math.random()).substring(2, 7);
+      if (games.docs.find((game) => game.id === newCode)) {
+        generateCode();
+      }
+    };
+    generateCode();
+
+    await setDoc(doc(gamesCollection, newCode), {
+      turn: Math.random() < 0.5 ? "Black" : "White",
+    });
+    router.push(`games/${newCode}`);
+  };
 
   return (
     <div className="flex justify-center items-center h-screen w-screen">
-      <div className="max-w-md rounded overflow-hidden shadow-lg bg-slate-800 px-5 h-1/4 flex flex-col justify-center">
+      <div className="max-w-md rounded overflow-hidden drop-shadow-2xl bg-slate-800 px-5 h-1/4 flex flex-col justify-center">
         <div className="py-4">
-          <div className="text-center text-xl md:text-2xl font-bold">
+          <div className="text-center text-xl sm:text-2xl font-bold">
             Create lobby or enter code to play!
           </div>
         </div>
