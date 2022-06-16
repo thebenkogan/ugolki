@@ -1,9 +1,12 @@
 import React from "react";
 import { firestore } from "../../firebase/clientApp";
-import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { useRouter } from "next/router";
+import { getAuth } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const gamesCollection = collection(firestore, "games");
+const auth = getAuth(firestore.app);
 
 function GameForm(): JSX.Element {
   const router = useRouter();
