@@ -6,8 +6,9 @@ import { getAuth } from "firebase/auth";
 import Login from "../components/login";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [user] = useAuthState(getAuth(firestore.app));
+  const [user, loading] = useAuthState(getAuth(firestore.app));
 
+  if (loading) return <div>Loading...</div>;
   if (!user) return <Login />;
 
   return (
