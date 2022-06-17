@@ -1,7 +1,7 @@
 import { DocumentReference, updateDoc } from "firebase/firestore";
 import React from "react";
 import { playMove } from "../game/game";
-import { movesFromCoordinate } from "../game/moves";
+import { flipMove, movesFromCoordinate } from "../game/moves";
 import { Coordinates, Game, Move } from "../types";
 import Square from "./Square";
 
@@ -32,7 +32,13 @@ function Board({
       setSelected(null);
       setHighlighted([]);
       setIsTurn(false);
-      await updateDoc(docRef!, { moves: JSON.stringify([...pastMoves, move]) });
+      await updateDoc(docRef!, {
+        moves: JSON.stringify([
+          ...pastMoves,
+          game.color === "White" ? move : flipMove(move),
+        ]),
+        turn: game.color === "White" ? "Black" : "White",
+      });
     } else {
       setHighlighted(
         game.board[cy][cx] === game.color

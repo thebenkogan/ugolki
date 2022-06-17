@@ -13,11 +13,13 @@ import {
   documentId,
   updateDoc,
   DocumentReference,
+  onSnapshot,
 } from "firebase/firestore";
 import { firestore } from "../../../firebase/clientApp";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { initializeGame } from "../../game/game";
+import { initializeGame, playMove } from "../../game/game";
 import Loading from "../../components/Loading";
+import { flipMove } from "../../game/moves";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
@@ -30,6 +32,24 @@ const Home: NextPage = () => {
   const router = useRouter();
   const { code } = router.query;
   const [user] = useAuthState(auth);
+
+  if (docRef) {
+    onSnapshot(docRef, (doc) => {
+      console.log(game);
+      if (doc.data()!.turn === game!.color) {
+        const moves: Move[] = JSON.parse(doc.data()!.moves);
+        const lastMove = moves[moves.length - 1];
+        setPastMoves(moves);
+        setIsTurn(true);
+        setGame((game) =>
+          playMove(
+            game!,
+            game!.color === "White" ? lastMove : flipMove(lastMove)
+          )
+        );
+      }
+    });
+  }
 
   useEffect(() => {
     if (code && user) {
@@ -59,10 +79,10 @@ const Home: NextPage = () => {
 
         if (user.uid === data.white) {
           setGame(initializeGame("White", JSON.parse(data.moves)));
-          setIsTurn(data.turn === "White");
+          setIsTurn(data.turn === data.white);
         } else if (user.uid === data.black) {
           setGame(initializeGame("Black", JSON.parse(data.moves)));
-          setIsTurn(data.turn === "Black");
+          setIsTurn(data.turn === data.black);
         } else {
           router.push("/");
         }
