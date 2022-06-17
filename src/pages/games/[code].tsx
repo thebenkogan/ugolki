@@ -47,7 +47,8 @@ const Home: NextPage = () => {
         if (!data.white) {
           await updateDoc(gameDoc.ref, { white: user!.uid });
           data.white = user!.uid;
-        } else {
+        }
+        if (!data.black) {
           await updateDoc(gameDoc.ref, { black: user!.uid });
           data.black = user!.uid;
         }
