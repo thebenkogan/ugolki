@@ -28,8 +28,8 @@ export function playMove(game: Game, move: Move): Game {
   const board = makeMove(game.board, move);
   return {
     board,
-    currentPlayer: game.currentPlayer,
-    moves: calculateLegalMoves(board, game.currentPlayer),
+    color: game.color,
+    moves: calculateLegalMoves(board, game.color),
   };
 }
 
@@ -38,7 +38,7 @@ export function initializeGame(player: Player, moves: Move[]): Game {
   const board = makeMoves(startBoard(player, opp), moves);
   return {
     board: board,
-    currentPlayer: player,
+    color: player,
     moves: calculateLegalMoves(board, player),
   };
 }

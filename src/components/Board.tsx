@@ -20,7 +20,7 @@ function Board({ game, setGame }: BoardProps): JSX.Element {
       setHighlighted([]);
     } else {
       setHighlighted(
-        game.board[cy][cx] === game.currentPlayer
+        game.board[cy][cx] === game.color
           ? movesFromCoordinate(game.moves, [cx, cy]).map((move) => move.end)
           : []
       );

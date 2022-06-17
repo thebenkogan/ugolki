@@ -12,7 +12,7 @@ export type Grid = Array<Array<Player | null>>;
 
 export type Game = {
   board: Grid;
-  currentPlayer: Player;
+  color: Player;
   moves: Move[];
 };
 
