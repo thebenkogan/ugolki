@@ -1,5 +1,5 @@
 import { Game, Grid, Move, Player } from "../types";
-import { calculateLegalMoves } from "./moves";
+import { calculateLegalMoves, flipMove } from "./moves";
 
 const startBoard = (player: Player, opp: Player) => [
   [opp, opp, opp, opp, null, null, null, null],
@@ -35,7 +35,8 @@ export function playMove(game: Game, move: Move): Game {
 
 export function initializeGame(player: Player, moves: Move[]): Game {
   const opp = player === "White" ? "Black" : "White";
-  const board = makeMoves(startBoard(player, opp), moves);
+  const movesForColor = player === "White" ? moves : moves.map(flipMove);
+  const board = makeMoves(startBoard(player, opp), movesForColor);
   return {
     board: board,
     color: player,

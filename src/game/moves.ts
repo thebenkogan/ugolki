@@ -24,13 +24,6 @@ export function calculateLegalMoves(
   return legalMoves;
 }
 
-export function movesFromCoordinate(
-  moves: Move[],
-  [x, y]: Coordinates
-): Move[] {
-  return moves.filter(({ start }) => start[0] === x && start[1] === y);
-}
-
 function calculateLegalMovesForPiece(board: Grid, [x, y]: Coordinates): Move[] {
   const legalMoves: Move[] = [];
 
@@ -74,6 +67,21 @@ function findJumpMoves(board: Grid, [x, y]: Coordinates): Move[] {
   findMoves([x, y], []);
 
   return jumpMoves;
+}
+
+export function movesFromCoordinate(
+  moves: Move[],
+  [x, y]: Coordinates
+): Move[] {
+  return moves.filter(({ start }) => start[0] === x && start[1] === y);
+}
+
+export function flipMove(move: Move): Move {
+  return {
+    start: [7 - move.start[0], 7 - move.start[1]],
+    end: [7 - move.end[0], 7 - move.end[1]],
+    path: move.path?.map(([x, y]) => [7 - x, 7 - y]),
+  };
 }
 
 function posInPath(path: Coordinates[], [x, y]: Coordinates): boolean {
