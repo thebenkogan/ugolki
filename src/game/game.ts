@@ -12,7 +12,7 @@ const startBoard = (player: Player, opp: Player) => [
   [null, null, null, null, player, player, player, player],
 ];
 
-export function playMove(board: Grid, move: Move): Grid {
+export function makeMove(board: Grid, move: Move): Grid {
   board[move.end[1]][move.end[0]] = board[move.start[1]][move.start[0]];
   board[move.start[1]][move.start[0]] = null;
   return board;
@@ -20,8 +20,17 @@ export function playMove(board: Grid, move: Move): Grid {
 
 export function makeMoves(board: Grid, moves: Move[]): Grid {
   return moves.reduce((board, move) => {
-    return playMove(board, move);
+    return makeMove(board, move);
   }, board);
+}
+
+export function playMove(game: Game, move: Move): Game {
+  const board = makeMove(game.board, move);
+  return {
+    board,
+    currentPlayer: game.currentPlayer,
+    moves: calculateLegalMoves(board, game.currentPlayer),
+  };
 }
 
 export function initializeGame(player: Player, moves: Move[]): Game {

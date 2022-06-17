@@ -28,36 +28,39 @@ const Home: NextPage = () => {
   const [user] = useAuthState(auth);
 
   useEffect(() => {
-    const initialize = async () => {
-      const gameDoc = (
-        await getDocs(
-          query(gamesCollection, where(documentId(), "==", `${code}`))
-        )
-      ).docs[0];
-      const data: Store = gameDoc.data() as Store;
+    if (code && user) {
+      const initialize = async () => {
+        const gameDoc = (
+          await getDocs(
+            query(gamesCollection, where(documentId(), "==", `${code}`))
+          )
+        ).docs[0];
+        console.log(gameDoc.data());
+        const data: Store = gameDoc.data() as Store;
 
-      if (!gameDoc) {
-        router.push("/");
-        return;
-      }
+        if (!gameDoc) {
+          router.push("/");
+          return;
+        }
 
-      if (!data.white) {
-        await updateDoc(gameDoc.ref, { white: user!.uid });
-        data.white = user!.uid;
-      } else {
-        await updateDoc(gameDoc.ref, { black: user!.uid });
-        data.black = user!.uid;
-      }
+        if (!data.white) {
+          await updateDoc(gameDoc.ref, { white: user!.uid });
+          data.white = user!.uid;
+        } else {
+          await updateDoc(gameDoc.ref, { black: user!.uid });
+          data.black = user!.uid;
+        }
 
-      if (user!.uid === data.white) {
-        setGame(initializeGame("White", data.moves));
-      } else if (user!.uid === data.black) {
-        setGame(initializeGame("Black", data.moves));
-      } else {
-        router.push("/");
-      }
-    };
-    initialize();
+        if (user!.uid === data.white) {
+          setGame(initializeGame("White", data.moves));
+        } else if (user!.uid === data.black) {
+          setGame(initializeGame("Black", data.moves));
+        } else {
+          router.push("/");
+        }
+      };
+      initialize();
+    }
   }, [code, user, router]);
 
   return (
