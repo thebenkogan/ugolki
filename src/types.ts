@@ -15,3 +15,9 @@ export type Game = {
   currentPlayer: Player;
   moves: Move[];
 };
+
+export type Store = {
+  moves: Move[];
+  white: string | null;
+  black: string | null;
+};

@@ -10,6 +10,7 @@ const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
 
 function GameForm(): JSX.Element {
+  const [user] = useAuthState(auth);
   const router = useRouter();
 
   const [code, setCode] = React.useState<string>("");
@@ -43,8 +44,11 @@ function GameForm(): JSX.Element {
     };
     generateCode();
 
+    const color = Math.random() < 0.5 ? "White" : "Black";
     await setDoc(doc(gamesCollection, newCode), {
-      turn: Math.random() < 0.5 ? "Black" : "White",
+      moves: [],
+      white: color === "White" ? user!.uid : null,
+      black: color === "Black" ? user!.uid : null,
     });
     router.push(`games/${newCode}`);
   };
