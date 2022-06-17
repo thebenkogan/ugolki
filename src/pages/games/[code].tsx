@@ -17,6 +17,7 @@ import {
 import { firestore } from "../../../firebase/clientApp";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { initializeGame } from "../../game/game";
+import Loading from "../../components/Loading";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
@@ -35,13 +36,13 @@ const Home: NextPage = () => {
             query(gamesCollection, where(documentId(), "==", `${code}`))
           )
         ).docs[0];
-        console.log(gameDoc.data());
-        const data: Store = gameDoc.data() as Store;
 
         if (!gameDoc) {
           router.push("/");
           return;
         }
+
+        const data: Store = gameDoc.data() as Store;
 
         if (!data.white) {
           await updateDoc(gameDoc.ref, { white: user!.uid });
@@ -72,7 +73,7 @@ const Home: NextPage = () => {
       </Head>
 
       <h1 className="text-center font-bold text-6xl my-5">Ugolki</h1>
-      {game && <Board game={game} setGame={setGame} />}
+      {game ? <Board game={game} setGame={setGame} /> : <Loading />}
     </div>
   );
 };

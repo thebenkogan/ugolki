@@ -1,18 +1,16 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import React from "react";
-import Board from "../components/Board";
-import { initializeGame } from "../game/game";
-import { Game } from "../types";
 import GameForm from "../components/GameForm";
-import Login from "../components/login";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { firestore } from "../../firebase/clientApp";
+import Login from "../components/login";
+import Loading from "../components/Loading";
 
 const Home: NextPage = () => {
   const [user, loading] = useAuthState(getAuth(firestore.app));
-  const content = user ? <GameForm /> : <Login loading={loading} />;
+  const content = user ? <GameForm /> : loading ? <Loading /> : <Login />;
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">
       <Head>
