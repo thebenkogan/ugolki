@@ -46,9 +46,10 @@ function GameForm(): JSX.Element {
 
     const color = Math.random() < 0.5 ? "White" : "Black";
     await setDoc(doc(gamesCollection, newCode), {
-      moves: [],
+      moves: "[]",
       white: color === "White" ? user!.uid : null,
       black: color === "Black" ? user!.uid : null,
+      turn: color,
     });
     router.push(`games/${newCode}`);
   };

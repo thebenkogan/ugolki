@@ -17,7 +17,8 @@ export type Game = {
 };
 
 export type Store = {
-  moves: Move[];
+  moves: string;
   white: string | null;
   black: string | null;
+  turn: Player;
 };

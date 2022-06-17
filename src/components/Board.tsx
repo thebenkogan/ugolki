@@ -1,23 +1,38 @@
+import { DocumentReference, updateDoc } from "firebase/firestore";
 import React from "react";
 import { playMove } from "../game/game";
 import { movesFromCoordinate } from "../game/moves";
-import { Coordinates, Game } from "../types";
+import { Coordinates, Game, Move } from "../types";
 import Square from "./Square";
 
 interface BoardProps {
   game: Game;
   setGame: (game: Game) => void;
+  pastMoves: Move[];
+  isTurn: boolean;
+  setIsTurn: (isTurn: boolean) => void;
+  docRef: DocumentReference;
 }
 
-function Board({ game, setGame }: BoardProps): JSX.Element {
+function Board({
+  game,
+  setGame,
+  pastMoves,
+  isTurn,
+  setIsTurn,
+  docRef,
+}: BoardProps): JSX.Element {
   const [highlighted, setHighlighted] = React.useState<Coordinates[]>([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
 
-  const handleClick = ([cx, cy]: Coordinates, isMove: boolean): void => {
-    if (isMove) {
-      setGame(playMove(game, { start: selected!, end: [cx, cy] }));
+  const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
+    if (isMove && isTurn) {
+      const move: Move = { start: selected!, end: [cx, cy] };
+      setGame(playMove(game, move));
       setSelected(null);
       setHighlighted([]);
+      setIsTurn(false);
+      await updateDoc(docRef!, { moves: JSON.stringify([...pastMoves, move]) });
     } else {
       setHighlighted(
         game.board[cy][cx] === game.color
