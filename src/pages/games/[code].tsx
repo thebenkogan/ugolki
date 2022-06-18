@@ -2,8 +2,8 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import React, { useEffect } from "react";
 import Board from "../../components/Board";
-import { Game, Move, Store } from "../../types";
-import { useRouter } from "next/router";
+import { Game, Move, Player, Store } from "../../types";
+import router, { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -33,26 +33,8 @@ const Home: NextPage = () => {
   const { code } = router.query;
   const [user] = useAuthState(auth);
 
-  if (docRef) {
-    onSnapshot(docRef, (doc) => {
-      console.log(game);
-      if (doc.data()!.turn === game!.color) {
-        const moves: Move[] = JSON.parse(doc.data()!.moves);
-        const lastMove = moves[moves.length - 1];
-        setPastMoves(moves);
-        setIsTurn(true);
-        setGame((game) =>
-          playMove(
-            game!,
-            game!.color === "White" ? lastMove : flipMove(lastMove)
-          )
-        );
-      }
-    });
-  }
-
   useEffect(() => {
-    if (code && user) {
+    if (code && user && !game) {
       const initialize = async () => {
         const gameDoc = (
           await getDocs(
@@ -64,9 +46,10 @@ const Home: NextPage = () => {
           router.push("/");
           return;
         }
-        setDocRef(gameDoc.ref);
 
         const data: Store = gameDoc.data() as Store;
+
+        setDocRef(gameDoc.ref);
 
         if (!data.white && user.uid !== data.black) {
           await updateDoc(gameDoc.ref, { white: user.uid });
@@ -77,19 +60,40 @@ const Home: NextPage = () => {
           data.black = user.uid;
         }
 
+        let color: Player;
         if (user.uid === data.white) {
           setGame(initializeGame("White", JSON.parse(data.moves)));
           setIsTurn(data.turn === data.white);
+          color = "White";
         } else if (user.uid === data.black) {
           setGame(initializeGame("Black", JSON.parse(data.moves)));
           setIsTurn(data.turn === data.black);
+          color = "Black";
         } else {
           router.push("/");
         }
+
+        const unsubscribe = onSnapshot(gameDoc.ref, (doc) => {
+          if (doc.data()!.turn === color) {
+            setIsTurn(true);
+            const moves: Move[] = JSON.parse(doc.data()!.moves);
+            const lastMove = moves[moves.length - 1];
+            if (!lastMove) return;
+            setPastMoves(moves);
+            setGame((game) =>
+              playMove(
+                game!,
+                game!.color === "White" ? lastMove : flipMove(lastMove)
+              )
+            );
+          }
+        });
+
+        return () => unsubscribe();
       };
       initialize();
     }
-  }, [code, user, router]);
+  }, [code, user, router, game]);
 
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">

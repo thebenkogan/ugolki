@@ -13,8 +13,10 @@ const startBoard = (player: Player, opp: Player) => [
 ];
 
 export function makeMove(board: Grid, move: Move): Grid {
-  board[move.end[1]][move.end[0]] = board[move.start[1]][move.start[0]];
-  board[move.start[1]][move.start[0]] = null;
+  if (board[move.start[1]][move.start[0]] !== null) {
+    board[move.end[1]][move.end[0]] = board[move.start[1]][move.start[0]];
+    board[move.start[1]][move.start[0]] = null;
+  }
   return board;
 }
 
