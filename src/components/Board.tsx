@@ -1,5 +1,5 @@
 import { DocumentReference, updateDoc } from "firebase/firestore";
-import React from "react";
+import React, { useEffect } from "react";
 import { playMove } from "../game/game";
 import { flipMove, movesFromCoordinate } from "../game/moves";
 import { Coordinates, Game, Move } from "../types";
@@ -24,6 +24,11 @@ function Board({
 }: BoardProps): JSX.Element {
   const [highlighted, setHighlighted] = React.useState<Coordinates[]>([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
+
+  useEffect(() => {
+    setHighlighted([]);
+    setSelected(null);
+  }, [game]);
 
   const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
     if (isMove && isTurn) {

@@ -20,5 +20,5 @@ export type Store = {
   moves: string;
   white: string | null;
   black: string | null;
-  turn: string;
+  turn: Player;
 };

@@ -60,18 +60,16 @@ const Home: NextPage = () => {
           data.black = user.uid;
         }
 
-        let color: Player;
+        let color: Player = "White";
         if (user.uid === data.white) {
           setGame(initializeGame("White", JSON.parse(data.moves)));
-          setIsTurn(data.turn === data.white);
-          color = "White";
         } else if (user.uid === data.black) {
           setGame(initializeGame("Black", JSON.parse(data.moves)));
-          setIsTurn(data.turn === data.black);
           color = "Black";
         } else {
           router.push("/");
         }
+        setIsTurn(data.turn === color);
 
         const unsubscribe = onSnapshot(gameDoc.ref, (doc) => {
           if (doc.data()!.turn === color) {
