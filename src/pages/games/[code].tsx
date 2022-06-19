@@ -21,6 +21,7 @@ import { initializeGame, playMove } from "../../game/game";
 import Loading from "../../components/Loading";
 import { flipMove } from "../../game/moves";
 import GameOver from "../../components/GameOver";
+import Header from "../../components/Header";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
@@ -52,6 +53,7 @@ const Home: NextPage = () => {
         const data: Store = gameDoc.data() as Store;
 
         setDocRef(gameDoc.ref);
+        setWinner(data.winner);
 
         if (!data.white && user.uid !== data.black) {
           await updateDoc(gameDoc.ref, { white: user.uid });
@@ -109,7 +111,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="text-center font-bold text-6xl my-5">Ugolki</h1>
+      <Header />
       {winner && game ? (
         <GameOver win={winner === game.color} />
       ) : game ? (

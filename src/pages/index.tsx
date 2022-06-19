@@ -7,6 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { firestore } from "../../firebase/clientApp";
 import Login from "../components/Login";
 import Loading from "../components/Loading";
+import Header from "../components/Header";
 
 const Home: NextPage = () => {
   const [user, loading] = useAuthState(getAuth(firestore.app));
@@ -19,7 +20,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="text-center font-bold text-6xl my-5">Ugolki</h1>
+      <Header />
       {content}
     </div>
   );
