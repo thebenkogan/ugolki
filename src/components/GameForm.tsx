@@ -74,6 +74,7 @@ function GameForm(): JSX.Element {
       white: color === "White" ? user!.uid : null,
       black: color === "Black" ? user!.uid : null,
       turn: color,
+      winner: null,
       timestamp: serverTimestamp(),
     });
     router.push(`games/${newCode}`);

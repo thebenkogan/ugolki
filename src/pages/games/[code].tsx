@@ -20,6 +20,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { initializeGame, playMove } from "../../game/game";
 import Loading from "../../components/Loading";
 import { flipMove } from "../../game/moves";
+import GameOver from "../../components/GameOver";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
@@ -29,6 +30,7 @@ const Home: NextPage = () => {
   const [pastMoves, setPastMoves] = React.useState<Move[]>([]);
   const [isTurn, setIsTurn] = React.useState<boolean>(false);
   const [docRef, setDocRef] = React.useState<DocumentReference | null>(null);
+  const [winner, setWinner] = React.useState<Player | null>(null);
   const router = useRouter();
   const { code } = router.query;
   const [user] = useAuthState(auth);
@@ -79,6 +81,7 @@ const Home: NextPage = () => {
           }
           if (doc.data()!.turn === color) {
             setIsTurn(true);
+            setWinner(doc.data()!.winner);
             const moves: Move[] = JSON.parse(doc.data()!.moves);
             const lastMove = moves[moves.length - 1];
             if (!lastMove) return;
@@ -107,7 +110,9 @@ const Home: NextPage = () => {
       </Head>
 
       <h1 className="text-center font-bold text-6xl my-5">Ugolki</h1>
-      {game ? (
+      {winner && game ? (
+        <GameOver win={winner === game.color} />
+      ) : game ? (
         <Board
           game={game}
           setGame={setGame}
@@ -115,6 +120,7 @@ const Home: NextPage = () => {
           isTurn={isTurn}
           setIsTurn={setIsTurn}
           docRef={docRef!}
+          setWinner={setWinner}
         />
       ) : (
         <Loading />

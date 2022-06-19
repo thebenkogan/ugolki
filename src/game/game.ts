@@ -5,8 +5,8 @@ const startBoard = (player: Player, opp: Player) => [
   [opp, opp, opp, opp, null, null, null, null],
   [opp, opp, opp, opp, null, null, null, null],
   [opp, opp, opp, opp, null, null, null, null],
-  [opp, opp, opp, opp, null, null, null, null],
-  [null, null, null, null, player, player, player, player],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
   [null, null, null, null, player, player, player, player],
   [null, null, null, null, player, player, player, player],
   [null, null, null, null, player, player, player, player],
@@ -44,4 +44,18 @@ export function initializeGame(player: Player, moves: Move[]): Game {
     color: player,
     moves: calculateLegalMoves(board, player),
   };
+}
+
+export function isGameOver(game: Game): Player | null {
+  const playerColor = game.color;
+  const oppColor = game.color === "White" ? "Black" : "White";
+  let player = true;
+  let opp = true;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 4; j++) {
+      player &&= game.board[i][j] === playerColor;
+      opp &&= game.board[7 - i][7 - j] === oppColor;
+    }
+  }
+  return player ? playerColor : opp ? oppColor : null;
 }

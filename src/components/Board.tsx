@@ -4,9 +4,9 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import React, { useEffect } from "react";
-import { playMove } from "../game/game";
+import { isGameOver, playMove } from "../game/game";
 import { flipMove, movesFromCoordinate } from "../game/moves";
-import { Coordinates, Game, Move } from "../types";
+import { Coordinates, Game, Move, Player } from "../types";
 import Square from "./Square";
 
 interface BoardProps {
@@ -16,6 +16,7 @@ interface BoardProps {
   isTurn: boolean;
   setIsTurn: (isTurn: boolean) => void;
   docRef: DocumentReference;
+  setWinner: (winner: Player | null) => void;
 }
 
 function Board({
@@ -25,6 +26,7 @@ function Board({
   isTurn,
   setIsTurn,
   docRef,
+  setWinner,
 }: BoardProps): JSX.Element {
   const [highlighted, setHighlighted] = React.useState<Coordinates[]>([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
@@ -37,16 +39,20 @@ function Board({
   const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
     if (isMove && isTurn) {
       const move: Move = { start: selected!, end: [cx, cy] };
-      setGame(playMove(game, move));
+      const newGame = playMove(game, move);
+      const winner = isGameOver(newGame);
+      setGame(newGame);
       setSelected(null);
       setHighlighted([]);
       setIsTurn(false);
+      setWinner(winner);
       await updateDoc(docRef!, {
         moves: JSON.stringify([
           ...pastMoves,
           game.color === "White" ? move : flipMove(move),
         ]),
         turn: game.color === "White" ? "Black" : "White",
+        winner: winner,
         timestamp: serverTimestamp(),
       });
     } else {

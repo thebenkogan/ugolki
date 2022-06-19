@@ -23,5 +23,6 @@ export type Store = {
   white: string | null;
   black: string | null;
   turn: Player;
+  winner: Player | null;
   timestamp: Timestamp;
 };
