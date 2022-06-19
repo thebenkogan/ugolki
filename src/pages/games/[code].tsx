@@ -72,6 +72,11 @@ const Home: NextPage = () => {
         setIsTurn(data.turn === color);
 
         const unsubscribe = onSnapshot(gameDoc.ref, (doc) => {
+          if (!doc.data()) {
+            // game expired
+            router.push("/");
+            return;
+          }
           if (doc.data()!.turn === color) {
             setIsTurn(true);
             const moves: Move[] = JSON.parse(doc.data()!.moves);

@@ -3,9 +3,12 @@ import { firestore } from "../../firebase/clientApp";
 import {
   collection,
   doc,
+  DocumentData,
   getDocs,
+  QuerySnapshot,
   serverTimestamp,
   setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
@@ -14,6 +17,18 @@ import Card from "./Card";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
+
+async function cleanGames(games: QuerySnapshot<DocumentData>) {
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+  const deletions: Promise<void>[] = [];
+  games.forEach(async (game) => {
+    if (game.data().timestamp.toDate() < twoHoursAgo) {
+      deletions.push(deleteDoc(game.ref));
+    }
+  });
+  return Promise.all(deletions);
+}
 
 function GameForm(): JSX.Element {
   const [user] = useAuthState(auth);
@@ -49,6 +64,9 @@ function GameForm(): JSX.Element {
       }
     };
     generateCode();
+
+    // delete all games older than 2 hours
+    await cleanGames(games);
 
     const color = Math.random() < 0.5 ? "White" : "Black";
     await setDoc(doc(gamesCollection, newCode), {
