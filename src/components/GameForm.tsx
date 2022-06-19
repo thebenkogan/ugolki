@@ -1,6 +1,12 @@
 import React from "react";
 import { firestore } from "../../firebase/clientApp";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
 import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -50,6 +56,7 @@ function GameForm(): JSX.Element {
       white: color === "White" ? user!.uid : null,
       black: color === "Black" ? user!.uid : null,
       turn: color,
+      timestamp: serverTimestamp(),
     });
     router.push(`games/${newCode}`);
   };

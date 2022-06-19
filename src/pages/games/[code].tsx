@@ -3,7 +3,7 @@ import Head from "next/head";
 import React, { useEffect } from "react";
 import Board from "../../components/Board";
 import { Game, Move, Player, Store } from "../../types";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import {
   collection,

@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export type Player = "White" | "Black";
 
 export type Coordinates = [number, number];
@@ -21,4 +23,5 @@ export type Store = {
   white: string | null;
   black: string | null;
   turn: Player;
+  timestamp: Timestamp;
 };

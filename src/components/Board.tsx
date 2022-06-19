@@ -1,4 +1,8 @@
-import { DocumentReference, updateDoc } from "firebase/firestore";
+import {
+  DocumentReference,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import React, { useEffect } from "react";
 import { playMove } from "../game/game";
 import { flipMove, movesFromCoordinate } from "../game/moves";
@@ -43,6 +47,7 @@ function Board({
           game.color === "White" ? move : flipMove(move),
         ]),
         turn: game.color === "White" ? "Black" : "White",
+        timestamp: serverTimestamp(),
       });
     } else {
       setHighlighted(
