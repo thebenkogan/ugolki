@@ -18,11 +18,11 @@ import Card from "./Card";
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
 
-async function cleanGames(games: QuerySnapshot<DocumentData>) {
+function cleanGames(games: QuerySnapshot<DocumentData>) {
   const twoHoursAgo = new Date();
   twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
   const deletions: Promise<void>[] = [];
-  games.forEach(async (game) => {
+  games.forEach((game) => {
     if (game.data().timestamp.toDate() < twoHoursAgo) {
       deletions.push(deleteDoc(game.ref));
     }
@@ -88,16 +88,16 @@ function GameForm(): JSX.Element {
         </div>
       </div>
       <form onSubmit={handleJoin} className="w-full max-w-sm my-5">
-        <div className="flex items-center border-b border-teal-500 py-2">
+        <div className="flex flex-col sm:flex-row items-center sm:border-b sm:border-teal-500 py-2">
           <input
             onChange={(e) => setCode(e.target.value)}
-            className="appearance-none bg-transparent border-none w-full mr-3 py-1 px-2 leading-tight focus:outline-none text-white"
+            className="appearance-none bg-transparent border-b border-teal-500 sm:border-none w-full mr-3 py-1 px-2 leading-tight focus:outline-none text-white text-center sm:text-left"
             type="text"
             placeholder="Lobby Code"
             aria-label="lobby code"
           />
           <button
-            className="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-4 rounded"
+            className="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-4 rounded mt-4 mb-2 sm:my-0"
             type="submit"
           >
             Join
