@@ -128,8 +128,8 @@ const Home: NextPage = () => {
         <Loading />
       )}
 
-      <div className="text-center font-bold text-xl underline">Game Code:</div>
-      <div className="text-center font-bold text-2xl mb-5">{code}</div>
+      <div className="text-center font-bold text-xl">Code:</div>
+      <div className="text-center font-bold text-3xl mb-5">{code}</div>
     </div>
   );
 };
