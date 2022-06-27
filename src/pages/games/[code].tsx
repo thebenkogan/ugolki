@@ -129,7 +129,7 @@ const Home: NextPage = () => {
       )}
 
       <div className="text-center font-bold text-xl">Code:</div>
-      <div className="text-center font-bold text-3xl mb-5">{code}</div>
+      <div className="text-center font-bold text-3xl mb-14 sm:mb-5">{code}</div>
     </div>
   );
 };
