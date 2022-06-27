@@ -26,7 +26,7 @@ function Square({
   return (
     <div
       onClick={() => handleClick(coord, highlighted)}
-      className={`${background} aspect-square flex justify-center items-center p-1 hover:border-4 hover:border-slate-400 hover:p-0`}
+      className={`${background} aspect-square flex justify-center items-center p-1 sm:hover:border-4 hover:border-slate-400 sm:hover:p-0`}
     >
       {player && (
         <div className={`${pieceColor} w-1/2 h-1/2 rounded-full`}></div>
