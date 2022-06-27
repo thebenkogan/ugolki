@@ -37,31 +37,33 @@ function Board({
   }, [game]);
 
   const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
-    if (isMove && isTurn) {
-      const move: Move = { start: selected!, end: [cx, cy] };
-      const newGame = playMove(game, move);
-      const winner = isGameOver(newGame);
-      setGame(newGame);
-      setSelected(null);
-      setHighlighted([]);
-      setIsTurn(false);
-      setWinner(winner);
-      await updateDoc(docRef!, {
-        moves: JSON.stringify([
-          ...pastMoves,
-          game.color === "White" ? move : flipMove(move),
-        ]),
-        turn: game.color === "White" ? "Black" : "White",
-        winner: winner,
-        timestamp: serverTimestamp(),
-      });
-    } else {
-      setHighlighted(
-        game.board[cy][cx] === game.color
-          ? movesFromCoordinate(game.moves, [cx, cy]).map((move) => move.end)
-          : []
-      );
-      setSelected([cx, cy]);
+    if (isTurn) {
+      if (isMove) {
+        const move: Move = { start: selected!, end: [cx, cy] };
+        const newGame = playMove(game, move);
+        const winner = isGameOver(newGame);
+        setGame(newGame);
+        setSelected(null);
+        setHighlighted([]);
+        setIsTurn(false);
+        setWinner(winner);
+        await updateDoc(docRef!, {
+          moves: JSON.stringify([
+            ...pastMoves,
+            game.color === "White" ? move : flipMove(move),
+          ]),
+          turn: game.color === "White" ? "Black" : "White",
+          winner: winner,
+          timestamp: serverTimestamp(),
+        });
+      } else {
+        setHighlighted(
+          game.board[cy][cx] === game.color
+            ? movesFromCoordinate(game.moves, [cx, cy]).map((move) => move.end)
+            : []
+        );
+        setSelected([cx, cy]);
+      }
     }
   };
 
