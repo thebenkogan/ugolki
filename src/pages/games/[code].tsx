@@ -104,7 +104,7 @@ const Home: NextPage = () => {
   }, [code, user, router, game]);
 
   return (
-    <div className="flex flex-col h-screen overflow-x-hidden">
+    <div className="flex flex-col h-screen overflow-x-hidden items-center">
       <Head>
         <title>Ugolki</title>
         <meta name="description" content="Ugolki" />
@@ -128,8 +128,12 @@ const Home: NextPage = () => {
         <Loading />
       )}
 
-      <div className="text-center font-bold text-xl">Code:</div>
-      <div className="text-center font-bold text-3xl mb-14 sm:mb-5">{code}</div>
+      <button
+        onClick={() => navigator.clipboard.writeText(`${code}`)}
+        className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mb-14 sm:mb-5"
+      >
+        {code}
+      </button>
     </div>
   );
 };
