@@ -129,11 +129,11 @@ const Home: NextPage = () => {
       )}
 
       <button
-        onClick={(e) => {
+        onClick={() => {
           navigator.clipboard.writeText(`${code}`);
           (document.activeElement as HTMLElement)?.blur();
         }}
-        className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mb-14 sm:mb-5"
+        className="bg-teal-500 focus:bg-teal-700 font-bold py-2 px-4 rounded-full mt-5 mb-20 sm:mb-5"
       >
         {code} 📋
       </button>
