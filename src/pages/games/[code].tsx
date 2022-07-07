@@ -113,7 +113,7 @@ const Home: NextPage = () => {
 
       <Header />
       {winner && game ? (
-        <GameOver win={winner === game.color} />
+        <GameOver win={winner === game.color} rematch={"us"} />
       ) : game ? (
         <Board
           game={game}
