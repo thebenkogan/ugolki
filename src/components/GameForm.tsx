@@ -3,7 +3,6 @@ import { firestore } from "../../firebase/clientApp";
 import {
   collection,
   doc,
-  DocumentData,
   getDocs,
   QuerySnapshot,
   serverTimestamp,
@@ -43,7 +42,7 @@ function GameForm(): JSX.Element {
     e.preventDefault();
     setError("");
 
-    const games = await getDocs(gamesCollection);
+    const games = (await getDocs(gamesCollection)) as QuerySnapshot<Store>;
 
     if (!games.docs.find((game) => game.id === code)) {
       setError("Game not found");
