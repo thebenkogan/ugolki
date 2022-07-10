@@ -24,5 +24,6 @@ export type Store = {
   black: string | null;
   turn: Player;
   winner: Player | null;
+  rematch: Player | null;
   timestamp: Timestamp;
 };
