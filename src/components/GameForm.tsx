@@ -9,16 +9,18 @@ import {
   serverTimestamp,
   setDoc,
   deleteDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Card from "./Card";
+import { Store } from "../types";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
 
-function cleanGames(games: QuerySnapshot<DocumentData>) {
+function cleanGames(games: QuerySnapshot<Store>) {
   const twoHoursAgo = new Date();
   twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
   const deletions: Promise<void>[] = [];
@@ -54,7 +56,7 @@ function GameForm(): JSX.Element {
   const handleCreate = async () => {
     setError("");
 
-    const games = await getDocs(gamesCollection);
+    const games = (await getDocs(gamesCollection)) as QuerySnapshot<Store>;
     let newCode = "";
 
     const generateCode = () => {
@@ -69,14 +71,16 @@ function GameForm(): JSX.Element {
     await cleanGames(games);
 
     const color = Math.random() < 0.5 ? "White" : "Black";
-    await setDoc(doc(gamesCollection, newCode), {
+    const initialData: Store = {
       moves: "[]",
       white: color === "White" ? user!.uid : null,
       black: color === "Black" ? user!.uid : null,
       turn: color,
       winner: null,
-      timestamp: serverTimestamp(),
-    });
+      rematch: null,
+      timestamp: serverTimestamp() as Timestamp, // firestore converts it to a Timestamp
+    };
+    await setDoc(doc(gamesCollection, newCode), initialData);
     router.push(`games/${newCode}`);
   };
 

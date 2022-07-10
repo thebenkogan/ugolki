@@ -50,7 +50,7 @@ const Home: NextPage = () => {
           return;
         }
 
-        const data: Store = gameDoc.data() as Store;
+        const data = gameDoc.data() as Store;
 
         setDocRef(gameDoc.ref);
         setWinner(data.winner);
