@@ -89,19 +89,25 @@ const Home: NextPage = () => {
             setRematch(data.rematch);
             return;
           }
-          if (data.turn === color) {
-            setIsTurn(true);
-            setWinner(data.winner);
-            const moves: Move[] = JSON.parse(data.moves);
-            const lastMove = moves[moves.length - 1];
-            if (!lastMove) return;
-            setPastMoves(moves);
-            setGame((game) =>
-              playMove(
-                game!,
-                game!.color === "White" ? lastMove : flipMove(lastMove)
-              )
-            );
+
+          setIsTurn(data.turn === color);
+          setWinner(data.winner);
+          const moves: Move[] = JSON.parse(data.moves);
+          const lastMove = moves[moves.length - 1];
+          setPastMoves(moves);
+          setGame((game) =>
+            !lastMove
+              ? initializeGame(color, [])
+              : data.turn === color
+              ? playMove(
+                  game!,
+                  game!.color === "White" ? lastMove : flipMove(lastMove)
+                )
+              : game
+          );
+          if (!lastMove) {
+            setWinner(null);
+            setRematch(null);
           }
         });
 
