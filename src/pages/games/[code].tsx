@@ -3,7 +3,7 @@ import Head from "next/head";
 import React, { useEffect } from "react";
 import Board from "../../components/Board";
 import { Game, Move, Player, Store } from "../../types";
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -14,6 +14,7 @@ import {
   updateDoc,
   DocumentReference,
   onSnapshot,
+  doc,
 } from "firebase/firestore";
 import { firestore } from "../../../firebase/clientApp";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -32,6 +33,7 @@ const Home: NextPage = () => {
   const [isTurn, setIsTurn] = React.useState<boolean>(false);
   const [docRef, setDocRef] = React.useState<DocumentReference | null>(null);
   const [winner, setWinner] = React.useState<Player | null>(null);
+  const [rematch, setRematch] = React.useState<Player | null>(null);
   const router = useRouter();
   const { code } = router.query;
   const [user] = useAuthState(auth);
@@ -54,6 +56,7 @@ const Home: NextPage = () => {
 
         setDocRef(gameDoc.ref);
         setWinner(data.winner);
+        setRematch(data.rematch);
 
         if (!data.white && user.uid !== data.black) {
           await updateDoc(gameDoc.ref, { white: user.uid });
@@ -76,15 +79,20 @@ const Home: NextPage = () => {
         setIsTurn(data.turn === color);
 
         const unsubscribe = onSnapshot(gameDoc.ref, (doc) => {
-          if (!doc.data()) {
+          const data = doc.data() as Store | undefined;
+          if (!data) {
             // game expired
             router.push("/");
             return;
           }
-          if (doc.data()!.turn === color) {
+          if (data.rematch) {
+            setRematch(data.rematch);
+            return;
+          }
+          if (data.turn === color) {
             setIsTurn(true);
-            setWinner(doc.data()!.winner);
-            const moves: Move[] = JSON.parse(doc.data()!.moves);
+            setWinner(data.winner);
+            const moves: Move[] = JSON.parse(data.moves);
             const lastMove = moves[moves.length - 1];
             if (!lastMove) return;
             setPastMoves(moves);
@@ -103,6 +111,20 @@ const Home: NextPage = () => {
     }
   }, [code, user, router, game]);
 
+  const requestRematch = async () => {
+    if (!rematch) {
+      setRematch(game!.color);
+      await updateDoc(docRef!, { rematch: game!.color });
+    } else if (rematch !== game!.color) {
+      const resetData: Partial<Store> = {
+        moves: "[]",
+        winner: null,
+        rematch: null,
+      };
+      await updateDoc(docRef!, resetData);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-x-hidden items-center">
       <Head>
@@ -113,7 +135,13 @@ const Home: NextPage = () => {
 
       <Header />
       {winner && game ? (
-        <GameOver win={winner === game.color} rematch={"us"} />
+        <GameOver
+          win={winner === game.color}
+          rematch={
+            rematch === null ? "none" : rematch === game.color ? "us" : "them"
+          }
+          requestRematch={requestRematch}
+        />
       ) : game ? (
         <Board
           game={game}
