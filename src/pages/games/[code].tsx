@@ -4,129 +4,81 @@ import React, { useEffect } from "react";
 import Board from "../../components/Board";
 import { Game, Move, Player, Store } from "../../types";
 import { useRouter } from "next/router";
-import { getAuth } from "firebase/auth";
-import {
-  collection,
-  where,
-  query,
-  getDocs,
-  documentId,
-  updateDoc,
-  DocumentReference,
-  onSnapshot,
-} from "firebase/firestore";
-import { firestore } from "../../../firebase/clientApp";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { updateDoc, onSnapshot } from "firebase/firestore";
 import { initializeGame, playMove } from "../../game/game";
 import Loading from "../../components/Loading";
 import { flipMove } from "../../game/moves";
 import GameOver from "../../components/GameOver";
 import Header from "../../components/Header";
-
-const gamesCollection = collection(firestore, "games");
-const auth = getAuth(firestore.app);
+import useInitialGame from "../../game/useInitialGame";
 
 const Home: NextPage = () => {
   const [game, setGame] = React.useState<Game | null>(null);
   const [pastMoves, setPastMoves] = React.useState<Move[]>([]);
   const [isTurn, setIsTurn] = React.useState<boolean>(false);
-  const [docRef, setDocRef] = React.useState<DocumentReference | null>(null);
   const [winner, setWinner] = React.useState<Player | null>(null);
   const [rematch, setRematch] = React.useState<Player | null>(null);
   const router = useRouter();
   const { code } = router.query;
-  const [user] = useAuthState(auth);
+  const { data, fail } = useInitialGame(code as string);
+  if (fail) router.push("/");
 
   useEffect(() => {
-    if (code && user && !game) {
-      const initialize = async () => {
-        const gameDoc = (
-          await getDocs(
-            query(gamesCollection, where(documentId(), "==", `${code}`))
-          )
-        ).docs[0];
+    if (data) {
+      setGame(data.game);
+      setPastMoves(data.pastMoves);
+      setIsTurn(data.isTurn);
+      setWinner(data.winner);
+      setRematch(data.rematch);
 
-        if (!gameDoc) {
+      const unsubscribe = onSnapshot(data.docRef, (doc) => {
+        const newData = doc.data() as Store | undefined;
+        if (!newData) {
+          // game expired
           router.push("/");
           return;
         }
-
-        const data = gameDoc.data() as Store;
-
-        setDocRef(gameDoc.ref);
-        setWinner(data.winner);
-        setRematch(data.rematch);
-
-        if (!data.white && user.uid !== data.black) {
-          await updateDoc(gameDoc.ref, { white: user.uid });
-          data.white = user.uid;
-        }
-        if (!data.black && user.uid !== data.white) {
-          await updateDoc(gameDoc.ref, { black: user.uid });
-          data.black = user.uid;
+        if (newData.rematch) {
+          setRematch(newData.rematch);
+          return;
         }
 
-        let color: Player = "White";
-        if (user.uid === data.white) {
-          setGame(initializeGame("White", JSON.parse(data.moves)));
-        } else if (user.uid === data.black) {
-          setGame(initializeGame("Black", JSON.parse(data.moves)));
-          color = "Black";
-        } else {
-          router.push("/");
+        setIsTurn(newData.turn === data.color);
+        setWinner(newData.winner);
+        const moves: Move[] = JSON.parse(newData.moves);
+        const lastMove = moves[moves.length - 1];
+        setPastMoves(moves);
+        setGame((game) =>
+          !lastMove
+            ? initializeGame(data.color, [])
+            : newData.turn === data.color
+            ? playMove(
+                game!,
+                game!.color === "White" ? lastMove : flipMove(lastMove)
+              )
+            : game
+        );
+        if (!lastMove) {
+          setWinner(null);
+          setRematch(null);
         }
-        setIsTurn(data.turn === color);
+      });
 
-        const unsubscribe = onSnapshot(gameDoc.ref, (doc) => {
-          const data = doc.data() as Store | undefined;
-          if (!data) {
-            // game expired
-            router.push("/");
-            return;
-          }
-          if (data.rematch) {
-            setRematch(data.rematch);
-            return;
-          }
-
-          setIsTurn(data.turn === color);
-          setWinner(data.winner);
-          const moves: Move[] = JSON.parse(data.moves);
-          const lastMove = moves[moves.length - 1];
-          setPastMoves(moves);
-          setGame((game) =>
-            !lastMove
-              ? initializeGame(color, [])
-              : data.turn === color
-              ? playMove(
-                  game!,
-                  game!.color === "White" ? lastMove : flipMove(lastMove)
-                )
-              : game
-          );
-          if (!lastMove) {
-            setWinner(null);
-            setRematch(null);
-          }
-        });
-
-        return () => unsubscribe();
-      };
-      initialize();
+      return () => unsubscribe();
     }
-  }, [code, user, router, game]);
+  }, [data, router]);
 
   const requestRematch = async () => {
     if (!rematch) {
       setRematch(game!.color);
-      await updateDoc(docRef!, { rematch: game!.color });
+      await updateDoc(data!.docRef, { rematch: game!.color });
     } else if (rematch !== game!.color) {
       const resetData: Partial<Store> = {
         moves: "[]",
         winner: null,
         rematch: null,
       };
-      await updateDoc(docRef!, resetData);
+      await updateDoc(data!.docRef, resetData);
     }
   };
 
@@ -154,7 +106,7 @@ const Home: NextPage = () => {
           pastMoves={pastMoves}
           isTurn={isTurn}
           setIsTurn={setIsTurn}
-          docRef={docRef!}
+          docRef={data!.docRef}
           setWinner={setWinner}
         />
       ) : (

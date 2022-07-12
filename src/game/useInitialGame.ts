@@ -20,6 +20,7 @@ const auth = getAuth(firestore.app);
 interface initialGame {
   docRef: DocumentReference;
   game: Game;
+  color: Player;
   pastMoves: Move[];
   isTurn: boolean;
   winner: Player | null;
@@ -29,14 +30,12 @@ interface initialGame {
 function useInitialGame(code: string): {
   data?: initialGame;
   fail?: boolean;
-  loading: boolean;
 } {
   const [user] = useAuthState(auth);
   const [initGame, setInitGame] = React.useState<initialGame | undefined>(
     undefined
   );
   const [fail, setFail] = React.useState<boolean>(false);
-  const [loading, setLoading] = React.useState<boolean>(true);
 
   useEffect(() => {
     if (user) {
@@ -78,18 +77,18 @@ function useInitialGame(code: string): {
         setInitGame({
           docRef: gameDoc.ref,
           game,
+          color,
           pastMoves: JSON.parse(data.moves),
           isTurn: data.turn === color,
           winner: data.winner,
           rematch: data.rematch,
         });
-        setLoading(false);
       };
       initialize();
     }
   }, [user, code]);
 
-  return { data: initGame, fail, loading };
+  return { data: initGame, fail };
 }
 
 export default useInitialGame;
