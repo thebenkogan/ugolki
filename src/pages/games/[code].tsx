@@ -23,8 +23,6 @@ const Home: NextPage = () => {
   const { data, fail } = useInitialGame(code as string);
   if (fail) router.push("/");
 
-  console.log(winner);
-
   useEffect(() => {
     if (data) {
       setPastMoves(data.pastMoves);
