@@ -9,8 +9,7 @@ import {
   DocumentReference,
 } from "firebase/firestore";
 import { firestore } from "../../firebase/clientApp";
-import { Store, Player, Move, Game } from "../types";
-import { initializeGame } from "./game";
+import { Store, Player, Move } from "../types";
 import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -19,7 +18,6 @@ const auth = getAuth(firestore.app);
 
 interface initialGame {
   docRef: DocumentReference;
-  game: Game;
   color: Player;
   pastMoves: Move[];
   isTurn: boolean;
@@ -62,21 +60,14 @@ function useInitialGame(code: string): {
           data.black = user.uid;
         }
 
-        let color: Player = "White";
-        let game: Game;
-        if (user.uid === data.white) {
-          game = initializeGame("White", JSON.parse(data.moves));
-        } else if (user.uid === data.black) {
-          game = initializeGame("Black", JSON.parse(data.moves));
-          color = "Black";
-        } else {
+        let color: Player = user.uid === data.white ? "White" : "Black";
+        if (user.uid !== data.white && user.uid !== data.black) {
           setFail(true);
           return;
         }
 
         setInitGame({
           docRef: gameDoc.ref,
-          game,
           color,
           pastMoves: JSON.parse(data.moves),
           isTurn: data.turn === color,

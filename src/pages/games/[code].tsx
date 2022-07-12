@@ -23,9 +23,10 @@ const Home: NextPage = () => {
   const { data, fail } = useInitialGame(code as string);
   if (fail) router.push("/");
 
+  console.log(winner);
+
   useEffect(() => {
     if (data) {
-      setGame(data.game);
       setPastMoves(data.pastMoves);
       setIsTurn(data.isTurn);
       setWinner(data.winner);
@@ -38,27 +39,25 @@ const Home: NextPage = () => {
           router.push("/");
           return;
         }
-        if (newData.rematch) {
-          setRematch(newData.rematch);
-          return;
-        }
 
         setIsTurn(newData.turn === data.color);
         setWinner(newData.winner);
+        setRematch(newData.rematch);
         const moves: Move[] = JSON.parse(newData.moves);
         const lastMove = moves[moves.length - 1];
         setPastMoves(moves);
-        setGame((game) =>
-          !lastMove
-            ? initializeGame(data.color, [])
-            : newData.turn === data.color
-            ? playMove(
+
+        if (lastMove && game) {
+          if (newData.turn === data.color && !newData.winner) {
+            setGame((game) =>
+              playMove(
                 game!,
                 game!.color === "White" ? lastMove : flipMove(lastMove)
               )
-            : game
-        );
-        if (!lastMove) {
+            );
+          }
+        } else {
+          setGame(initializeGame(data.color, moves));
           setWinner(null);
           setRematch(null);
         }
@@ -66,6 +65,7 @@ const Home: NextPage = () => {
 
       return () => unsubscribe();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, router]);
 
   const requestRematch = async () => {
