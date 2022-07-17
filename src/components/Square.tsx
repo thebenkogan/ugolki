@@ -2,14 +2,20 @@ import { Coordinates, Player } from "../types";
 
 interface SquareProps {
   coord: Coordinates;
+  path?: Coordinates[];
   tileColor: string;
   highlighted: boolean;
-  handleClick: (highlighted: Coordinates, isMove: boolean) => void;
+  handleClick: (
+    highlighted: Coordinates,
+    isMove: boolean,
+    path?: Coordinates[]
+  ) => void;
   player?: Player;
 }
 
 function Square({
   coord,
+  path,
   tileColor,
   highlighted,
   handleClick,
@@ -24,7 +30,7 @@ function Square({
 
   return (
     <div
-      onClick={() => handleClick(coord, highlighted)}
+      onClick={() => handleClick(coord, highlighted, path)}
       className={`${background} aspect-square flex justify-center items-center p-1 sm:hover:border-4 hover:border-slate-400 sm:hover:p-0`}
     >
       {player && (

@@ -3,7 +3,7 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
-import React, { useEffect } from "react";
+import React from "react";
 import { isGameOver, playMove } from "../game/game";
 import { flipMove, movesFromCoordinate } from "../game/moves";
 import { Coordinates, Game, Move, Player } from "../types";
@@ -28,13 +28,19 @@ function Board({
   docRef,
   setWinner,
 }: BoardProps): JSX.Element {
-  const [highlighted, setHighlighted] = React.useState<Coordinates[]>([]);
+  const [highlighted, setHighlighted] = React.useState<
+    [Coordinates, Coordinates[] | undefined][]
+  >([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
 
-  const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
+  const handleClick = async (
+    [cx, cy]: Coordinates,
+    isMove: boolean,
+    path?: Coordinates[]
+  ) => {
     if (isTurn) {
       if (isMove) {
-        const move: Move = { start: selected!, end: [cx, cy] };
+        const move: Move = { start: selected!, end: [cx, cy], path };
         const newGame = playMove(game, move);
         const winner = isGameOver(newGame);
         setGame(newGame);
@@ -54,7 +60,10 @@ function Board({
       } else {
         setHighlighted(
           game.board[cy][cx] === game.color
-            ? movesFromCoordinate(game.moves, [cx, cy]).map((move) => move.end)
+            ? movesFromCoordinate(game.moves, [cx, cy]).map((move) => [
+                move.end,
+                move.path,
+              ])
             : []
         );
         setSelected([cx, cy]);
@@ -70,14 +79,16 @@ function Board({
       >
         {game.board.flatMap((row, y) =>
           row.map((player, x) => {
+            const highlight = highlighted.find(
+              ([[hx, hy], _]) => hx === x && hy === y
+            );
             return (
               <Square
                 key={x * 10 + y}
                 coord={[x, y]}
+                path={highlight?.[1]} // path to square from selected, if in such a state
                 tileColor={(x + y) % 2 == 0 ? "dark" : "light"}
-                highlighted={highlighted.some(
-                  ([hx, hy]) => hx === x && hy === y
-                )}
+                highlighted={!!highlight}
                 handleClick={handleClick}
                 player={player ? player : undefined}
               />
