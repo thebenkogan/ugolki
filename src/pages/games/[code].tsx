@@ -47,7 +47,6 @@ const Home: NextPage = () => {
         setGame((game) => {
           if (lastMove && game) {
             if (newData.turn === data.color && !newData.winner) {
-              console.log("play");
               return playMove(
                 game,
                 game.color === "White" ? lastMove : flipMove(lastMove)

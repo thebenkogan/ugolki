@@ -5,6 +5,7 @@ interface SquareProps {
   path?: Coordinates[];
   tileColor: string;
   highlighted: boolean;
+  isLastMoveSquare: boolean;
   handleClick: (
     highlighted: Coordinates,
     isMove: boolean,
@@ -18,11 +19,14 @@ function Square({
   path,
   tileColor,
   highlighted,
+  isLastMoveSquare,
   handleClick,
   player,
 }: SquareProps): JSX.Element {
   const background = highlighted
     ? "bg-green-400"
+    : isLastMoveSquare
+    ? "bg-yellow-500"
     : tileColor == "dark"
     ? "bg-amber-700"
     : "bg-orange-300";

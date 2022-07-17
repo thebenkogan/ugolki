@@ -5,7 +5,11 @@ import {
 } from "firebase/firestore";
 import React from "react";
 import { isGameOver, playMove } from "../game/game";
-import { flipMove, movesFromCoordinate } from "../game/moves";
+import {
+  flipMove,
+  moveContainsCoordinate,
+  movesFromCoordinate,
+} from "../game/moves";
 import { Coordinates, Game, Move, Player } from "../types";
 import Square from "./Square";
 
@@ -32,6 +36,7 @@ function Board({
     [Coordinates, Coordinates[] | undefined][]
   >([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
+  const lastMove = pastMoves[pastMoves.length - 1];
 
   const handleClick = async (
     [cx, cy]: Coordinates,
@@ -82,6 +87,13 @@ function Board({
             const highlight = highlighted.find(
               ([[hx, hy], _]) => hx === x && hy === y
             );
+            const isLastMoveSquare =
+              isTurn &&
+              !!lastMove &&
+              moveContainsCoordinate(
+                game.color === "White" ? lastMove : flipMove(lastMove),
+                [x, y]
+              );
             return (
               <Square
                 key={x * 10 + y}
@@ -89,6 +101,7 @@ function Board({
                 path={highlight?.[1]} // path to square from selected, if in such a state
                 tileColor={(x + y) % 2 == 0 ? "dark" : "light"}
                 highlighted={!!highlight}
+                isLastMoveSquare={isLastMoveSquare}
                 handleClick={handleClick}
                 player={player ? player : undefined}
               />

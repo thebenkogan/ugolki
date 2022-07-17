@@ -84,6 +84,17 @@ export function flipMove(move: Move): Move {
   };
 }
 
+export function moveContainsCoordinate(
+  move: Move,
+  [x, y]: Coordinates
+): boolean {
+  return (
+    (move.start[0] === x && move.start[1] === y) ||
+    (move.end[0] === x && move.end[1] === y) ||
+    !!move.path?.some(([px, py]) => px === x && py === y)
+  );
+}
+
 function posInPath(path: Coordinates[], [x, y]: Coordinates): boolean {
   return path.some(([px, py]) => px === x && py === y);
 }
