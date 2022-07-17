@@ -44,21 +44,21 @@ const Home: NextPage = () => {
         const moves: Move[] = JSON.parse(newData.moves);
         const lastMove = moves[moves.length - 1];
         setPastMoves(moves);
-
-        if (lastMove && game) {
-          if (newData.turn === data.color && !newData.winner) {
-            setGame((game) =>
-              playMove(
-                game!,
-                game!.color === "White" ? lastMove : flipMove(lastMove)
-              )
-            );
+        setGame((game) => {
+          if (lastMove && game) {
+            if (newData.turn === data.color && !newData.winner) {
+              console.log("play");
+              return playMove(
+                game,
+                game.color === "White" ? lastMove : flipMove(lastMove)
+              );
+            } else {
+              return game;
+            }
+          } else {
+            return initializeGame(data.color, moves);
           }
-        } else {
-          setGame(initializeGame(data.color, moves));
-          setWinner(null);
-          setRematch(null);
-        }
+        });
       });
 
       return () => unsubscribe();
