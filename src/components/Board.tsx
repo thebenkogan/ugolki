@@ -31,11 +31,6 @@ function Board({
   const [highlighted, setHighlighted] = React.useState<Coordinates[]>([]);
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
 
-  useEffect(() => {
-    setHighlighted([]);
-    setSelected(null);
-  }, [game]);
-
   const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
     if (isTurn) {
       if (isMove) {
