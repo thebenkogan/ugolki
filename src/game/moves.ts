@@ -58,7 +58,7 @@ function findJumpMoves(board: Grid, [x, y]: Coordinates): Move[] {
         jumpMoves.push({
           start: [x, y],
           end: nextJump,
-          path: seen,
+          path: seen.length ? seen : undefined,
         });
       }
     });
