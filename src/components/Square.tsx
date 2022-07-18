@@ -38,7 +38,9 @@ function Square({
       className={`${background} aspect-square flex justify-center items-center p-1 sm:hover:border-4 hover:border-slate-400 sm:hover:p-0`}
     >
       {player && (
-        <div className={`${pieceColor} w-1/2 h-1/2 rounded-full`}></div>
+        <div
+          className={`${pieceColor} w-1/2 h-1/2 rounded-full aspect-square`}
+        ></div>
       )}
     </div>
   );
