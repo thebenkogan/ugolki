@@ -80,7 +80,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-x-hidden items-center">
+    <div className="flex flex-col h-screen overflow-hidden items-center justify-between">
       <Head>
         <title>Ugolki</title>
         <meta name="description" content="Ugolki" />

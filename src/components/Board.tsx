@@ -78,9 +78,9 @@ function Board({
 
   const border = isTurn ? "border-teal-500" : "border-black";
   return (
-    <div className="flex justify-center items-center h-screen w-screen">
+    <div className="flex justify-center items-center max-h-fit w-screen">
       <div
-        className={`grid grid-cols-8 grid-rows-8 w-screen sm:max-w-xl mx-5 border-4 sm:border-8 ${border}`}
+        className={`tall-board sm:screen-board border-4 sm:border-8 ${border}`}
       >
         {game.board.flatMap((row, y) =>
           row.map((player, x) => {

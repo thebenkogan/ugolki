@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .screen-board {
+    border-image-slice: 1;
+    width: 70vw;
+    height: 70vw;
+    background: #c0d3ff;
+    max-height: 70vh;
+    max-width: 70vh;
+
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+  }
+
+  .tall-board {
+    border-image-slice: 1;
+    width: 90vw;
+    height: 90vw;
+    background: #c0d3ff;
+    max-height: 90vh;
+    max-width: 90vh;
+
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+  }
+}
