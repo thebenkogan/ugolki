@@ -1,5 +1,4 @@
 import React from "react";
-import { firestore } from "../../firebase/clientApp";
 import {
   collection,
   doc,
@@ -14,12 +13,13 @@ import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Card from "./Card";
-import { Store } from "../types";
+import { firestore } from "../firebase/clientApp";
+import { GameStore } from "../firebase/utils";
 
 const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
 
-function cleanGames(games: QuerySnapshot<Store>) {
+function cleanGames(games: QuerySnapshot<GameStore>) {
   const twoHoursAgo = new Date();
   twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
   const deletions: Promise<void>[] = [];
@@ -42,7 +42,7 @@ function GameForm(): JSX.Element {
     e.preventDefault();
     setError("");
 
-    const games = (await getDocs(gamesCollection)) as QuerySnapshot<Store>;
+    const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
 
     if (!games.docs.find((game) => game.id === code)) {
       setError("Game not found");
@@ -55,7 +55,7 @@ function GameForm(): JSX.Element {
   const handleCreate = async () => {
     setError("");
 
-    const games = (await getDocs(gamesCollection)) as QuerySnapshot<Store>;
+    const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
     let newCode = "";
 
     const generateCode = () => {
@@ -70,7 +70,7 @@ function GameForm(): JSX.Element {
     await cleanGames(games);
 
     const color = Math.random() < 0.5 ? "White" : "Black";
-    const initialData: Store = {
+    const initialData: GameStore = {
       moves: "[]",
       white: color === "White" ? user!.uid : null,
       black: color === "Black" ? user!.uid : null,

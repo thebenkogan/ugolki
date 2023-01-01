@@ -4,7 +4,7 @@ import React from "react";
 import GameForm from "../components/GameForm";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { firestore } from "../../firebase/clientApp";
+import { firestore } from "../firebase/clientApp";
 import Login from "../components/Login";
 import Loading from "../components/Loading";
 import Header from "../components/Header";

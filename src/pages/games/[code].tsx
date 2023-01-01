@@ -1,81 +1,42 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import React, { useEffect } from "react";
 import Board from "../../components/Board";
-import { Game, Move, Player, Store } from "../../types";
+import { Game, Move, Player } from "../../types";
 import { useRouter } from "next/router";
-import { updateDoc, onSnapshot } from "firebase/firestore";
-import { initializeGame, playMove } from "../../game/game";
+import { updateDoc } from "firebase/firestore";
 import Loading from "../../components/Loading";
-import { flipMove } from "../../game/moves";
 import GameOver from "../../components/GameOver";
 import Header from "../../components/Header";
 import useInitialGame from "../../game/useInitialGame";
+import { GameStore, useGameSync } from "../../firebase/utils";
+
+export interface GameData {
+  pastMoves: Move[];
+  isTurn: boolean;
+  winner: Player | null;
+  rematch: Player | null;
+  game: Game;
+}
 
 const Home: NextPage = () => {
-  const [game, setGame] = React.useState<Game | null>(null);
-  const [pastMoves, setPastMoves] = React.useState<Move[]>([]);
-  const [isTurn, setIsTurn] = React.useState<boolean>(false);
-  const [winner, setWinner] = React.useState<Player | null>(null);
-  const [rematch, setRematch] = React.useState<Player | null>(null);
   const router = useRouter();
   const { code } = router.query;
-  const { data, fail } = useInitialGame(code as string);
+  const { data: initialData, docRef, fail } = useInitialGame(code as string);
   if (fail) router.push("/");
-
-  useEffect(() => {
-    if (data) {
-      setPastMoves(data.pastMoves);
-      setIsTurn(data.isTurn);
-      setWinner(data.winner);
-      setRematch(data.rematch);
-
-      const unsubscribe = onSnapshot(data.docRef, (doc) => {
-        const newData = doc.data() as Store | undefined;
-        if (!newData) {
-          // game expired
-          router.push("/");
-          return;
-        }
-
-        setIsTurn(newData.turn === data.color);
-        setWinner(newData.winner);
-        setRematch(newData.rematch);
-        const moves: Move[] = JSON.parse(newData.moves);
-        const lastMove = moves[moves.length - 1];
-        setPastMoves(moves);
-        setGame((game) => {
-          if (lastMove && game) {
-            if (newData.turn === data.color && !newData.winner) {
-              return playMove(
-                game,
-                game.color === "White" ? lastMove : flipMove(lastMove)
-              );
-            } else {
-              return game;
-            }
-          } else {
-            return initializeGame(data.color, moves);
-          }
-        });
-      });
-
-      return () => unsubscribe();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, router]);
+  const [gameData, setGameData] = useGameSync(initialData, docRef);
+  if (!gameData || !docRef) return <Loading />;
 
   const requestRematch = async () => {
-    if (!rematch) {
-      setRematch(game!.color);
-      await updateDoc(data!.docRef, { rematch: game!.color });
-    } else if (rematch !== game!.color) {
-      const resetData: Partial<Store> = {
+    if (!gameData.rematch) {
+      setGameData({ ...gameData, rematch: gameData.game.color });
+      await updateDoc(docRef, { rematch: gameData.game.color });
+    } else if (gameData.rematch !== gameData.game.color) {
+      const resetData: Partial<GameStore> = {
         moves: "[]",
         winner: null,
         rematch: null,
       };
-      await updateDoc(data!.docRef, resetData);
+      await updateDoc(docRef, resetData);
     }
   };
 
@@ -88,26 +49,20 @@ const Home: NextPage = () => {
       </Head>
 
       <Header />
-      {winner && game ? (
+      {gameData.winner && gameData ? (
         <GameOver
-          win={winner === game.color}
+          win={gameData.winner === gameData.game.color}
           rematch={
-            rematch === null ? "none" : rematch === game.color ? "us" : "them"
+            gameData.rematch === null
+              ? "none"
+              : gameData.rematch === gameData.game.color
+              ? "us"
+              : "them"
           }
           requestRematch={requestRematch}
         />
-      ) : game ? (
-        <Board
-          game={game}
-          setGame={setGame}
-          pastMoves={pastMoves}
-          isTurn={isTurn}
-          setIsTurn={setIsTurn}
-          docRef={data!.docRef}
-          setWinner={setWinner}
-        />
       ) : (
-        <Loading />
+        <Board docRef={docRef} gameData={gameData} setGameData={setGameData} />
       )}
 
       <button

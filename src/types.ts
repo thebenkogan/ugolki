@@ -1,5 +1,3 @@
-import { Timestamp } from "firebase/firestore";
-
 export type Player = "White" | "Black";
 
 export type Coordinates = [number, number];
@@ -16,14 +14,4 @@ export type Game = {
   board: Grid;
   color: Player;
   moves: Move[];
-};
-
-export type Store = {
-  moves: string;
-  white: string | null;
-  black: string | null;
-  turn: Player;
-  winner: Player | null;
-  rematch: Player | null;
-  timestamp: Timestamp;
 };

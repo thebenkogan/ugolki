@@ -1,6 +1,6 @@
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import React from "react";
-import { firestore } from "../../firebase/clientApp";
+import { firestore } from "../firebase/clientApp";
 import Card from "./Card";
 
 const auth = getAuth(firestore.app);
