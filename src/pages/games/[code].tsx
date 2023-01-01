@@ -25,12 +25,13 @@ const Home: NextPage = () => {
   if (fail) router.push("/");
   const [gameData, setGameData] = useGameSync(initialData, docRef);
   if (!gameData || !docRef) return <Loading />;
+  const { winner, rematch, game } = gameData;
 
   const requestRematch = async () => {
-    if (!gameData.rematch) {
-      setGameData({ ...gameData, rematch: gameData.game.color });
-      await updateDoc(docRef, { rematch: gameData.game.color });
-    } else if (gameData.rematch !== gameData.game.color) {
+    if (!rematch) {
+      setGameData({ ...gameData, rematch: game.color });
+      await updateDoc(docRef, { rematch: game.color });
+    } else if (rematch !== game.color) {
       const resetData: Partial<GameStore> = {
         moves: "[]",
         winner: null,
@@ -49,15 +50,11 @@ const Home: NextPage = () => {
       </Head>
 
       <Header />
-      {gameData.winner && gameData ? (
+      {winner && gameData ? (
         <GameOver
-          win={gameData.winner === gameData.game.color}
+          win={winner === game.color}
           rematch={
-            gameData.rematch === null
-              ? "none"
-              : gameData.rematch === gameData.game.color
-              ? "us"
-              : "them"
+            rematch === null ? "none" : rematch === game.color ? "us" : "them"
           }
           requestRematch={requestRematch}
         />
