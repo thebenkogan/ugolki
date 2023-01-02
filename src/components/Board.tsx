@@ -4,6 +4,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import React from "react";
+import { sendMove } from "../firebase/utils";
 import { isGameOver, playMove } from "../game/game";
 import {
   findMove,
@@ -34,24 +35,17 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
         const move = findMove(gameData.game.moves, selected!, [cx, cy])!;
         const newGame = playMove(gameData.game, move);
         const winner = isGameOver(newGame);
-        setGameData({
+        const newGameData = {
           game: newGame,
           pastMoves: [...gameData.pastMoves, move],
           isTurn: false,
           winner,
           rematch: null,
-        });
+        };
+        setGameData(newGameData);
         setSelected(null);
         setHighlighted([]);
-        await updateDoc(docRef!, {
-          moves: JSON.stringify([
-            ...gameData.pastMoves,
-            newGame.color === "White" ? move : flipMove(move),
-          ]),
-          turn: newGame.color === "White" ? "Black" : "White",
-          winner: winner,
-          timestamp: serverTimestamp(),
-        });
+        await sendMove(newGameData, docRef);
       } else {
         setHighlighted(
           gameData.game.board[cy][cx] === gameData.game.color

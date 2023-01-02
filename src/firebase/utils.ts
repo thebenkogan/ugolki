@@ -190,3 +190,24 @@ export async function isValidGameCode(code: string) {
   const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
   return games.docs.some((game) => game.id === code);
 }
+
+/**
+ * @param gameData the updated game data with the new move played
+ * @param docRef the game lobby document reference to update
+ */
+export async function sendMove(
+  gameData: GameData,
+  docRef: DocumentReference<DocumentData>
+) {
+  const playerColor = gameData.game.color;
+  const moves =
+    playerColor == "White"
+      ? gameData.pastMoves
+      : gameData.pastMoves.map(flipMove);
+  await updateDoc(docRef, {
+    moves: JSON.stringify(moves),
+    turn: playerColor === "White" ? "Black" : "White",
+    winner: gameData.winner,
+    timestamp: serverTimestamp(),
+  });
+}
