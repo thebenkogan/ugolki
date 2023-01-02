@@ -16,6 +16,7 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { playMove, initializeGame } from "../game/game";
 import { flipMove } from "../game/moves";
@@ -83,6 +84,7 @@ export function useGameSync(
   initialGameData?: GameData,
   docRef?: DocumentReference<DocumentData>
 ): [GameData | undefined, Dispatch<SetStateAction<GameData | undefined>>] {
+  const router = useRouter();
   const [gameData, setGameData] = useState<GameData | undefined>();
 
   useEffect(() => {
@@ -92,8 +94,7 @@ export function useGameSync(
         const newData = doc.data() as GameStore | undefined;
         if (!newData) {
           // game expired
-          // TODO: handle this
-          setGameData(undefined);
+          router.push("/");
           return;
         }
 
@@ -124,7 +125,7 @@ export function useGameSync(
       });
       return () => unsubscribe();
     }
-  }, [docRef, initialGameData, setGameData]);
+  }, [docRef, initialGameData, router, setGameData]);
 
   return [gameData, setGameData];
 }
