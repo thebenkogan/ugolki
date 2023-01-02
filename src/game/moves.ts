@@ -1,4 +1,3 @@
-import { start } from "repl";
 import { Coordinates, Grid, Move, Player } from "../types";
 
 const directions = [

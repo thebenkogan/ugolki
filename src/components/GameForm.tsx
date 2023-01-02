@@ -1,35 +1,12 @@
 import React from "react";
-import {
-  collection,
-  doc,
-  getDocs,
-  QuerySnapshot,
-  serverTimestamp,
-  setDoc,
-  deleteDoc,
-  Timestamp,
-} from "firebase/firestore";
 import { useRouter } from "next/router";
 import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Card from "./Card";
 import { firestore } from "../firebase/clientApp";
-import { GameStore } from "../firebase/utils";
+import { createGame, isValidGameCode } from "../firebase/utils";
 
-const gamesCollection = collection(firestore, "games");
 const auth = getAuth(firestore.app);
-
-function cleanGames(games: QuerySnapshot<GameStore>) {
-  const twoHoursAgo = new Date();
-  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
-  const deletions: Promise<void>[] = [];
-  games.forEach((game) => {
-    if (game.data().timestamp.toDate() < twoHoursAgo) {
-      deletions.push(deleteDoc(game.ref));
-    }
-  });
-  return Promise.all(deletions);
-}
 
 function GameForm(): JSX.Element {
   const [user] = useAuthState(auth);
@@ -42,44 +19,16 @@ function GameForm(): JSX.Element {
     e.preventDefault();
     setError("");
 
-    const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
-
-    if (!games.docs.find((game) => game.id === code)) {
+    if (await isValidGameCode(code)) {
+      router.push(`games/${code}`);
+    } else {
       setError("Game not found");
-      return;
     }
-
-    router.push(`games/${code}`);
   };
 
   const handleCreate = async () => {
     setError("");
-
-    const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
-    let newCode = "";
-
-    const generateCode = () => {
-      newCode = ("" + Math.random()).substring(2, 7);
-      if (games.docs.find((game) => game.id === newCode)) {
-        generateCode();
-      }
-    };
-    generateCode();
-
-    // delete all games older than 2 hours
-    await cleanGames(games);
-
-    const color = Math.random() < 0.5 ? "White" : "Black";
-    const initialData: GameStore = {
-      moves: "[]",
-      white: color === "White" ? user!.uid : null,
-      black: color === "Black" ? user!.uid : null,
-      turn: color,
-      winner: null,
-      rematch: null,
-      timestamp: serverTimestamp() as Timestamp, // firestore converts it to a Timestamp
-    };
-    await setDoc(doc(gamesCollection, newCode), initialData);
+    let newCode = await createGame(user!);
     router.push(`games/${newCode}`);
   };
 

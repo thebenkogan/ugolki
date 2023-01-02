@@ -10,6 +10,11 @@ import {
   DocumentData,
   DocumentReference,
   onSnapshot,
+  QuerySnapshot,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { playMove, initializeGame } from "../game/game";
@@ -122,4 +127,65 @@ export function useGameSync(
   }, [docRef, initialGameData, setGameData]);
 
   return [gameData, setGameData];
+}
+
+/**
+ * @param games snapshot of games collection
+ * @returns Promise that resolves when all deletions of expired games are complete
+ */
+function cleanGames(games: QuerySnapshot<GameStore>) {
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+  const deletions: Promise<void>[] = [];
+  games.forEach((game) => {
+    if (game.data().timestamp.toDate() < twoHoursAgo) {
+      deletions.push(deleteDoc(game.ref));
+    }
+  });
+  return Promise.all(deletions);
+}
+
+/**
+ * @param games snapshot of games collection
+ * @returns 5 digit game code that is not currently in use
+ */
+async function createGameCode(
+  games: QuerySnapshot<GameStore>
+): Promise<string> {
+  let newCode = "";
+  const generateCode = () => {
+    newCode = ("" + Math.random()).substring(2, 7);
+    if (games.docs.some((game) => game.id === newCode)) generateCode();
+  };
+  generateCode();
+  return newCode;
+}
+
+/**
+ * Creates a fresh game lobby with the user assigned to a random color.
+ *
+ * @param user The current active user
+ * @returns The new game lobby code
+ */
+export async function createGame(user: User) {
+  const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
+  const newCode = await createGameCode(games);
+  await cleanGames(games);
+  const color = Math.random() < 0.5 ? "White" : "Black";
+  const initialData: GameStore = {
+    moves: "[]",
+    white: color === "White" ? user!.uid : null,
+    black: color === "Black" ? user!.uid : null,
+    turn: color,
+    winner: null,
+    rematch: null,
+    timestamp: serverTimestamp() as Timestamp, // firestore converts it to a Timestamp
+  };
+  await setDoc(doc(gamesCollection, newCode), initialData);
+  return newCode;
+}
+
+export async function isValidGameCode(code: string) {
+  const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
+  return games.docs.some((game) => game.id === code);
 }
