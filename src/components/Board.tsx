@@ -6,12 +6,13 @@ import {
 import React from "react";
 import { isGameOver, playMove } from "../game/game";
 import {
+  findMove,
   flipMove,
   moveContainsCoordinate,
   movesFromCoordinate,
 } from "../game/moves";
 import { GameData } from "../pages/games/[code]";
-import { Coordinates, Game, Move, Player } from "../types";
+import { Coordinates, Move } from "../types";
 import Square from "./Square";
 
 interface BoardProps {
@@ -27,14 +28,10 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
   const [selected, setSelected] = React.useState<Coordinates | null>(null);
   const lastMove = gameData.pastMoves[gameData.pastMoves.length - 1];
 
-  const handleClick = async (
-    [cx, cy]: Coordinates,
-    isMove: boolean,
-    path?: Coordinates[]
-  ) => {
+  const handleClick = async ([cx, cy]: Coordinates, isMove: boolean) => {
     if (gameData.isTurn) {
       if (isMove) {
-        const move: Move = { start: selected!, end: [cx, cy], path };
+        const move = findMove(gameData.game.moves, selected!, [cx, cy])!;
         const newGame = playMove(gameData.game, move);
         const winner = isGameOver(newGame);
         setGameData({
@@ -77,7 +74,7 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
       >
         {gameData.game.board.flatMap((row, y) =>
           row.map((player, x) => {
-            const highlight = highlighted.find(
+            const squareIsHighlighted = highlighted.some(
               ([[hx, hy], _]) => hx === x && hy === y
             );
             const isLastMoveSquare =
@@ -91,9 +88,8 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
               <Square
                 key={x * 10 + y}
                 coord={[x, y]}
-                path={highlight?.[1]} // path to square from selected, if in such a state
                 tileColor={(x + y) % 2 == 0 ? "dark" : "light"}
-                highlighted={!!highlight}
+                highlighted={squareIsHighlighted}
                 isLastMoveSquare={isLastMoveSquare}
                 handleClick={handleClick}
                 player={player ? player : undefined}

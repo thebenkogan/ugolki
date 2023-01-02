@@ -1,3 +1,4 @@
+import { start } from "repl";
 import { Coordinates, Grid, Move, Player } from "../types";
 
 const directions = [
@@ -92,6 +93,22 @@ export function moveContainsCoordinate(
     (move.start[0] === x && move.start[1] === y) ||
     (move.end[0] === x && move.end[1] === y) ||
     !!move.path?.some(([px, py]) => px === x && py === y)
+  );
+}
+
+/**
+ * @param moves list of moves to search through
+ * @param start target start coordinate
+ * @param end target end coordinate
+ * @returns the move in [moves] with the given [start] and [end] coordinate,
+ * or undefined if no such move exists
+ */
+export function findMove(moves: Move[], start: Coordinates, end: Coordinates) {
+  const [sx, sy] = start;
+  const [ex, ey] = end;
+  return moves.find(
+    ({ start: [msx, msy], end: [mex, mey] }) =>
+      msx === sx && msy === sy && mex === ex && mey === ey
   );
 }
 
