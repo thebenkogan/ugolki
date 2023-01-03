@@ -1,4 +1,10 @@
-import { calculateLegalMoves, flipMove, Move } from "./moves";
+import {
+  calculateLegalMoves,
+  Coordinates,
+  flipMove,
+  Move,
+  movesEqual,
+} from "./moves";
 
 export type Game = {
   board: Grid;
@@ -55,7 +61,21 @@ export function initializeGame(player: Player, moves: Move[]): Game {
   };
 }
 
-export function isGameOver(game: Game): Player | null {
+/**
+ * @param game the game to check for a winner
+ * @param pastMoves the moves that have been played in the game
+ * @returns the winning player's color if there is a winner, null otherwise.
+ * If there is a threefold repetition (i.e. the last player to move has made
+ * that move twice in the last 4 folds), returns the player closest to winning.
+ */
+export function isGameOver(game: Game, pastMoves: Move[]): Player | null {
+  let winner = getWinner(game);
+  if (winner != null) return winner;
+  if (isThreeFoldRepetition(pastMoves)) return closestToWinning(game);
+  return null;
+}
+
+function getWinner(game: Game): Player | null {
   const playerColor = game.color;
   const oppColor = game.color === "White" ? "Black" : "White";
   let player = true;
@@ -67,4 +87,59 @@ export function isGameOver(game: Game): Player | null {
     }
   }
   return player ? playerColor : opp ? oppColor : null;
+}
+
+function manhattanDistance(
+  [ax, ay]: Coordinates,
+  [bx, by]: Coordinates
+): number {
+  return Math.abs(ax - bx) + Math.abs(ay - by);
+}
+
+/**
+ * @param game the current game
+ * @returns the player whose pieces are closest to the winning corner; the
+ * distance is calculated as the average manhattan distance of all pieces
+ */
+export function closestToWinning(game: Game): Player {
+  const playerColor = game.color;
+  const oppColor = game.color === "White" ? "Black" : "White";
+  const playerCorner: Coordinates = [0, 0];
+  const oppCorner: Coordinates = [7, 7];
+
+  let playerDists = 0;
+  let oppDists = 0;
+  game.board.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === playerColor) {
+        playerDists += manhattanDistance([x, y], playerCorner);
+      } else if (cell === oppColor) {
+        oppDists += manhattanDistance([x, y], oppCorner);
+      }
+    });
+  });
+
+  // average the manhattan distances over all 12 pieces
+  playerDists = playerDists / 12;
+  oppDists = oppDists / 12;
+
+  return playerDists < oppDists ? playerColor : oppColor;
+}
+
+/**
+ * @param pastMoves the past moves of the game
+ * @returns true if the last player to make a move has repeated this move
+ * 3 times in the past 4 folds. I.e. we care about these highlighted moves:
+ *
+ * `[..., pl*, opp, pl, opp, pl*, opp, pl, opp, pl*]`
+ */
+function isThreeFoldRepetition(pastMoves: Move[]) {
+  if (pastMoves.length < 9) return false;
+
+  const playerMoves: Move[] = [];
+  for (let i = 0; i < 3; i++) {
+    playerMoves.push(pastMoves[pastMoves.length - 4 * i - 1]);
+  }
+
+  return playerMoves.every((move) => movesEqual(move, playerMoves[0]));
 }

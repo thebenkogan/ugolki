@@ -18,7 +18,12 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { playMove, initializeGame, Player } from "../game/game";
+import {
+  playMove,
+  initializeGame,
+  Player,
+  closestToWinning,
+} from "../game/game";
 import { flipMove, Move } from "../game/moves";
 import { GameData } from "../pages/games/[code]";
 import { firestore } from "./clientApp";
@@ -149,9 +154,7 @@ function cleanGames(games: QuerySnapshot<GameStore>) {
  * @param games snapshot of games collection
  * @returns 5 digit game code that is not currently in use
  */
-async function createGameCode(
-  games: QuerySnapshot<GameStore>
-): Promise<string> {
+function createGameCode(games: QuerySnapshot<GameStore>): string {
   let newCode = "";
   const generateCode = () => {
     newCode = ("" + Math.random()).substring(2, 7);
@@ -169,7 +172,7 @@ async function createGameCode(
  */
 export async function createGame(user: User) {
   const games = (await getDocs(gamesCollection)) as QuerySnapshot<GameStore>;
-  const newCode = await createGameCode(games);
+  const newCode = createGameCode(games);
   await cleanGames(games);
   const color = Math.random() < 0.5 ? "White" : "Black";
   const initialData: GameStore = {

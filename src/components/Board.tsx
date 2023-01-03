@@ -30,10 +30,11 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
       if (isMove) {
         const move = findMove(gameData.game.moves, selected!, [cx, cy])!;
         const newGame = playMove(gameData.game, move);
-        const winner = isGameOver(newGame);
+        const newPastMoves = [...gameData.pastMoves, move];
+        const winner = isGameOver(newGame, newPastMoves);
         const newGameData = {
           game: newGame,
-          pastMoves: [...gameData.pastMoves, move],
+          pastMoves: newPastMoves,
           isTurn: false,
           winner,
           rematch: null,

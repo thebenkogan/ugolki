@@ -111,12 +111,7 @@ export function moveContainsCoordinate(
  * or undefined if no such move exists
  */
 export function findMove(moves: Move[], start: Coordinates, end: Coordinates) {
-  const [sx, sy] = start;
-  const [ex, ey] = end;
-  return moves.find(
-    ({ start: [msx, msy], end: [mex, mey] }) =>
-      msx === sx && msy === sy && mex === ex && mey === ey
-  );
+  return moves.find((move) => movesEqual(move, { start, end }));
 }
 
 function posInPath(path: Coordinates[], [x, y]: Coordinates): boolean {
@@ -125,4 +120,16 @@ function posInPath(path: Coordinates[], [x, y]: Coordinates): boolean {
 
 function isInBounds([x, y]: Coordinates): boolean {
   return x >= 0 && x <= 7 && y >= 0 && y <= 7;
+}
+
+/**
+ * @param move1 move to compare
+ * @param move2 move to compare
+ * @returns true if the moves have the same start and end coordinates
+ */
+export function movesEqual(
+  { start: [asx, asy], end: [aex, aey] }: Move,
+  { start: [bsx, bsy], end: [bex, bey] }: Move
+): boolean {
+  return asx === bsx && asy === bsy && aex === bex && aey === bey;
 }
