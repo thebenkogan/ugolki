@@ -1,4 +1,4 @@
-import { Coordinates, Grid, Move, Player } from "../types";
+import { Grid, Player } from "./game";
 
 const directions = [
   [-1, 0],
@@ -6,6 +6,14 @@ const directions = [
   [0, 1],
   [1, 0],
 ];
+
+export type Move = {
+  start: Coordinates;
+  end: Coordinates;
+  path?: Coordinates[]; // for jump moves, start and end exclusive
+};
+
+export type Coordinates = [number, number];
 
 export function calculateLegalMoves(
   board: Grid,

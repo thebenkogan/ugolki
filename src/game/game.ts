@@ -1,5 +1,14 @@
-import { Game, Grid, Move, Player } from "../types";
-import { calculateLegalMoves, flipMove } from "./moves";
+import { calculateLegalMoves, flipMove, Move } from "./moves";
+
+export type Game = {
+  board: Grid;
+  color: Player;
+  moves: Move[];
+};
+
+export type Grid = Array<Array<Player | null>>;
+
+export type Player = "White" | "Black";
 
 const startBoard = (player: Player, opp: Player) => [
   [opp, opp, opp, opp, null, null, null, null],

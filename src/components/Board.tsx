@@ -1,19 +1,15 @@
-import {
-  DocumentReference,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
+import { DocumentReference } from "firebase/firestore";
 import React from "react";
 import { sendMove } from "../firebase/utils";
 import { isGameOver, playMove } from "../game/game";
 import {
+  Coordinates,
   findMove,
   flipMove,
   moveContainsCoordinate,
   movesFromCoordinate,
 } from "../game/moves";
 import { GameData } from "../pages/games/[code]";
-import { Coordinates, Move } from "../types";
 import Square from "./Square";
 
 interface BoardProps {

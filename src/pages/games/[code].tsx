@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Board from "../../components/Board";
-import { Game, Move, Player } from "../../types";
 import { useRouter } from "next/router";
 import { updateDoc } from "firebase/firestore";
 import Loading from "../../components/Loading";
@@ -9,6 +8,8 @@ import GameOver from "../../components/GameOver";
 import Header from "../../components/Header";
 import useInitialGame from "../../game/useInitialGame";
 import { GameStore, useGameSync } from "../../firebase/utils";
+import { Game, Player } from "../../game/game";
+import { Move } from "../../game/moves";
 
 export interface GameData {
   pastMoves: Move[];

@@ -18,10 +18,9 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { playMove, initializeGame } from "../game/game";
-import { flipMove } from "../game/moves";
+import { playMove, initializeGame, Player } from "../game/game";
+import { flipMove, Move } from "../game/moves";
 import { GameData } from "../pages/games/[code]";
-import { Move, Player } from "../types";
 import { firestore } from "./clientApp";
 
 const gamesCollection = collection(firestore, "games");

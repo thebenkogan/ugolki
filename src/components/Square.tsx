@@ -1,4 +1,5 @@
-import { Coordinates, Player } from "../types";
+import { Player } from "../game/game";
+import { Coordinates } from "../game/moves";
 
 interface SquareProps {
   coord: Coordinates;
