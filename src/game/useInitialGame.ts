@@ -4,7 +4,7 @@ import { firestore } from "../firebase/clientApp";
 import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { GameData } from "../pages/games/[code]";
-import { updateAndRetrieveGameInfo } from "../firebase/utils";
+import { updateAndRetrieveGameInfo } from "../firebase/games";
 
 const auth = getAuth(firestore.app);
 

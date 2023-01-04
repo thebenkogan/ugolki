@@ -7,7 +7,7 @@ import Loading from "../../components/Loading";
 import GameOver from "../../components/GameOver";
 import Header from "../../components/Header";
 import useInitialGame from "../../game/useInitialGame";
-import { GameStore, useGameSync } from "../../firebase/utils";
+import { GameStore, useGameSync } from "../../firebase/games";
 import { Game, Player } from "../../game/game";
 import { Move } from "../../game/moves";
 

@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Card from "./Card";
 import { firestore } from "../firebase/clientApp";
-import { createGame, isValidGameCode } from "../firebase/utils";
+import { createGame, isValidGameCode } from "../firebase/games";
 
 const auth = getAuth(firestore.app);
 

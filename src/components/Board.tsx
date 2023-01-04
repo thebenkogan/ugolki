@@ -1,6 +1,6 @@
 import { DocumentReference } from "firebase/firestore";
 import React from "react";
-import { sendMove } from "../firebase/utils";
+import { sendMove } from "../firebase/games";
 import { isGameOver, playMove } from "../game/game";
 import {
   Coordinates,
