@@ -18,15 +18,11 @@ import {
 } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import {
-  playMove,
-  initializeGame,
-  Player,
-  closestToWinning,
-} from "../game/game";
+import { playMove, initializeGame, Player } from "../game/game";
 import { flipMove, Move } from "../game/moves";
 import { GameData } from "../pages/games/[code]";
 import { firestore } from "./clientApp";
+import { createRivalry } from "./users";
 
 const gamesCollection = collection(firestore, "games");
 
@@ -40,6 +36,10 @@ export type GameStore = {
   timestamp: Timestamp;
 };
 
+function getOppId(color: Player, white: string | null, black: string | null) {
+  return color === "White" ? black || undefined : white || undefined;
+}
+
 /**
  * @param code Game lobby code
  * @param user The current active user
@@ -52,7 +52,7 @@ export async function updateAndRetrieveGameInfo(
   user: User
 ): Promise<[GameData, DocumentReference<DocumentData>] | null> {
   const gameDoc = (
-    await getDocs(query(gamesCollection, where(documentId(), "==", `${code}`)))
+    await getDocs(query(gamesCollection, where(documentId(), "==", code)))
   ).docs[0];
   if (!gameDoc) return null;
   const data = gameDoc.data() as GameStore;
@@ -60,10 +60,12 @@ export async function updateAndRetrieveGameInfo(
   // update white or black player spots if empty and this player can fill it
   if (!data.white && user.uid !== data.black) {
     await updateDoc(gameDoc.ref, { white: user.uid });
+    await createRivalry(user.uid, data.black!);
     data.white = user.uid;
   }
   if (!data.black && user.uid !== data.white) {
     await updateDoc(gameDoc.ref, { black: user.uid });
+    await createRivalry(user.uid, data.white!);
     data.black = user.uid;
   }
 
@@ -74,6 +76,7 @@ export async function updateAndRetrieveGameInfo(
 
   return [
     {
+      oppId: getOppId(color, data.white, data.black),
       pastMoves: moves,
       isTurn: data.turn === color,
       winner: data.winner,
@@ -107,6 +110,7 @@ export function useGameSync(
 
         setGameData((oldGameData) => {
           let newGame = oldGameData!.game;
+          const oppId = getOppId(newGame.color, newData.white, newData.black);
           if (newData.turn === newGame.color && !newData.winner && lastMove) {
             // opponent made a move
             newGame = playMove(
@@ -119,6 +123,7 @@ export function useGameSync(
           }
 
           return {
+            oppId,
             isTurn: newData.turn === newGame.color,
             winner: newData.winner,
             rematch: newData.rematch,

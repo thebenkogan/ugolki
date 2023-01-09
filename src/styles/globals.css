@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer components {
-  .screen-board {
+  .phone-board {
     border-image-slice: 1;
     width: 70vw;
     height: 70vw;
@@ -16,7 +16,7 @@
     grid-template-rows: repeat(8, 1fr);
   }
 
-  .tall-board {
+  .board {
     border-image-slice: 1;
     width: 90vw;
     height: 90vw;
@@ -27,5 +27,15 @@
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
+  }
+
+  .phone-player-bar-width {
+    width: 70vw;
+    max-width: 70vh;
+  }
+
+  .player-bar-width {
+    width: 90vw;
+    max-width: 90vh;
   }
 }

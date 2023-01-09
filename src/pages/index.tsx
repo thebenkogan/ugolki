@@ -8,9 +8,16 @@ import { firestore } from "../firebase/clientApp";
 import Login from "../components/Login";
 import Loading from "../components/Loading";
 import Header from "../components/Header";
+import { addUser } from "../firebase/users";
+
+let userAdded = false;
 
 const Home: NextPage = () => {
   const [user, loading] = useAuthState(getAuth(firestore.app));
+  if (user && !userAdded) {
+    addUser(user);
+    userAdded = true;
+  }
   const content = user ? <GameForm /> : loading ? <Loading /> : <Login />;
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">

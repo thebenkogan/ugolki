@@ -10,8 +10,16 @@ import useInitialGame from "../../game/useInitialGame";
 import { GameStore, useGameSync } from "../../firebase/games";
 import { Game, Player } from "../../game/game";
 import { Move } from "../../game/moves";
+import { useGameUser } from "../../firebase/users";
+import PlayerBar from "../../components/PlayerBar";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { getAuth } from "firebase/auth";
+import { firestore } from "../../firebase/clientApp";
+
+const auth = getAuth(firestore.app);
 
 export interface GameData {
+  oppId?: string;
   pastMoves: Move[];
   isTurn: boolean;
   winner: Player | null;
@@ -25,7 +33,10 @@ const Home: NextPage = () => {
   const { data: initialData, docRef, fail } = useInitialGame(code as string);
   if (fail) router.push("/");
   const [gameData, setGameData] = useGameSync(initialData, docRef);
-  if (!gameData || !docRef) return <Loading />;
+  const [user] = useAuthState(auth);
+  const gameUser = useGameUser(user?.uid);
+  const oppUser = useGameUser(gameData?.oppId);
+  if (!gameData || !docRef || !gameUser) return <Loading />;
   const { winner, rematch, game } = gameData;
 
   const requestRematch = async () => {
@@ -43,7 +54,7 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden items-center justify-between">
+    <div className="flex flex-col h-screen overflow-x-hidden items-center justify-between">
       <Head>
         <title>Ugolki</title>
         <meta name="description" content="Ugolki" />
@@ -60,7 +71,15 @@ const Home: NextPage = () => {
           requestRematch={requestRematch}
         />
       ) : (
-        <Board docRef={docRef} gameData={gameData} setGameData={setGameData} />
+        <div className="flex flex-col items-center">
+          <PlayerBar gameUser={oppUser} />
+          <Board
+            docRef={docRef}
+            gameData={gameData}
+            setGameData={setGameData}
+          />
+          <PlayerBar gameUser={gameUser} />
+        </div>
       )}
 
       <button

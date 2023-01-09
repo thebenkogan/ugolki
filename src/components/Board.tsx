@@ -33,11 +33,11 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
         const newPastMoves = [...gameData.pastMoves, move];
         const winner = isGameOver(newGame, newPastMoves);
         const newGameData = {
+          ...gameData,
           game: newGame,
           pastMoves: newPastMoves,
           isTurn: false,
           winner,
-          rematch: null,
         };
         setGameData(newGameData);
         setSelected(null);
@@ -60,9 +60,7 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
   const border = gameData.isTurn ? "border-teal-500" : "border-black";
   return (
     <div className="flex justify-center items-center max-h-fit w-screen">
-      <div
-        className={`tall-board sm:screen-board border-4 sm:border-8 ${border}`}
-      >
+      <div className={`board sm:phone-board border-4 sm:border-8 ${border}`}>
         {gameData.game.board.flatMap((row, y) =>
           row.map((player, x) => {
             const squareIsHighlighted = highlighted.some(
