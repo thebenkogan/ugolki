@@ -1,6 +1,7 @@
 import { DocumentReference } from "firebase/firestore";
 import React from "react";
 import { sendMove } from "../firebase/games";
+import { updateRivalry } from "../firebase/users";
 import { isGameOver, playMove } from "../game/game";
 import {
   Coordinates,
@@ -16,9 +17,15 @@ interface BoardProps {
   gameData: GameData;
   setGameData: React.Dispatch<React.SetStateAction<GameData | undefined>>;
   docRef: DocumentReference;
+  userId?: string;
 }
 
-function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
+function Board({
+  gameData,
+  setGameData,
+  docRef,
+  userId,
+}: BoardProps): JSX.Element {
   const [highlighted, setHighlighted] = React.useState<
     [Coordinates, Coordinates[] | undefined][]
   >([]);
@@ -43,6 +50,9 @@ function Board({ gameData, setGameData, docRef }: BoardProps): JSX.Element {
         setSelected(null);
         setHighlighted([]);
         await sendMove(newGameData, docRef);
+        if (winner) {
+          updateRivalry(userId!, gameData.oppId!, winner === newGame.color);
+        }
       } else {
         setHighlighted(
           gameData.game.board[cy][cx] === gameData.game.color

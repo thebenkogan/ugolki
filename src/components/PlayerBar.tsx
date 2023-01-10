@@ -3,9 +3,10 @@ import Image from "next/image";
 
 interface PlayerBarProps {
   gameUser?: GameUser;
+  wins?: number;
 }
 
-function PlayerBar({ gameUser }: PlayerBarProps): JSX.Element {
+function PlayerBar({ gameUser, wins }: PlayerBarProps): JSX.Element {
   return (
     <div className="flex items-center player-bar-width sm:phone-player-bar-width relative h-7 sm:h-11 my-4 sm:mb-2">
       {gameUser && (
@@ -19,6 +20,9 @@ function PlayerBar({ gameUser }: PlayerBarProps): JSX.Element {
           />
 
           <div className="font-bold mx-2">{gameUser.name}</div>
+          {wins != undefined && (
+            <div className="bg-gray-500 w-auto rounded-sm px-2">{wins}</div>
+          )}
         </>
       )}
     </div>

@@ -10,7 +10,7 @@ import useInitialGame from "../../game/useInitialGame";
 import { GameStore, useGameSync } from "../../firebase/games";
 import { Game, Player } from "../../game/game";
 import { Move } from "../../game/moves";
-import { useGameUser } from "../../firebase/users";
+import { useRivalry } from "../../firebase/users";
 import PlayerBar from "../../components/PlayerBar";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from "firebase/auth";
@@ -34,8 +34,7 @@ const Home: NextPage = () => {
   if (fail) router.push("/");
   const [gameData, setGameData] = useGameSync(initialData, docRef);
   const [user] = useAuthState(auth);
-  const gameUser = useGameUser(user?.uid);
-  const oppUser = useGameUser(gameData?.oppId);
+  const { us: gameUser, rival } = useRivalry(user?.uid, gameData?.oppId);
   if (!gameData || !docRef || !gameUser) return <Loading />;
   const { winner, rematch, game } = gameData;
 
@@ -72,13 +71,14 @@ const Home: NextPage = () => {
         />
       ) : (
         <div className="flex flex-col items-center">
-          <PlayerBar gameUser={oppUser} />
+          <PlayerBar gameUser={rival?.opp} wins={rival?.losses} />
           <Board
             docRef={docRef}
             gameData={gameData}
             setGameData={setGameData}
+            userId={user?.uid}
           />
-          <PlayerBar gameUser={gameUser} />
+          <PlayerBar gameUser={gameUser} wins={rival?.wins} />
         </div>
       )}
 

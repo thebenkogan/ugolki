@@ -2,17 +2,16 @@ import { getAuth, User } from "firebase/auth";
 import {
   collection,
   doc,
-  DocumentData,
-  DocumentReference,
   getDoc,
   getDocs,
+  increment,
+  onSnapshot,
   setDoc,
+  Unsubscribe,
+  updateDoc,
 } from "firebase/firestore";
-import React, { useEffect } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { GameData } from "../pages/games/[code]";
+import React, { useEffect, useRef } from "react";
 import { firestore } from "./clientApp";
-import { updateAndRetrieveGameInfo } from "./games";
 
 const auth = getAuth(firestore.app);
 
@@ -101,21 +100,28 @@ export async function getRivalById(user: User, rivalId: string) {
 }
 
 export async function createRivalry(id1: string, id2: string) {
-  await setDoc(
+  if ((await getDoc(doc(firestore, "users", id1, "rivals", id2))).exists()) {
+    return;
+  }
+  await setDoc(doc(firestore, "users", id1, "rivals", id2), {
+    wins: 0,
+    losses: 0,
+  });
+  await setDoc(doc(firestore, "users", id2, "rivals", id1), {
+    wins: 0,
+    losses: 0,
+  });
+}
+
+export async function updateRivalry(id1: string, id2: string, id1Won: boolean) {
+  const inc = increment(1);
+  await updateDoc(
     doc(firestore, "users", id1, "rivals", id2),
-    {
-      wins: 0,
-      losses: 0,
-    },
-    { merge: true }
+    id1Won ? { wins: inc } : { losses: inc }
   );
-  await setDoc(
+  await updateDoc(
     doc(firestore, "users", id2, "rivals", id1),
-    {
-      wins: 0,
-      losses: 0,
-    },
-    { merge: true }
+    id1Won ? { losses: inc } : { wins: inc }
   );
 }
 
@@ -130,4 +136,46 @@ export function useGameUser(userId: string | undefined): GameUser | undefined {
   }, [userId]);
 
   return data;
+}
+
+export function useRivalry(
+  userId?: string,
+  rivalId?: string
+): { us?: GameUser; rival?: Rival } {
+  const [us, setUs] = React.useState<GameUser>();
+  const [rival, setRival] = React.useState<Rival>();
+  const rivalUnsub = useRef<Unsubscribe>(() => {});
+
+  useEffect(() => {
+    if (userId) {
+      const initialize = async () =>
+        setUs(
+          (await getDoc(doc(firestore, "users", userId))).data() as GameUser
+        );
+      initialize();
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId && rivalId) {
+      const initialize = async () => {
+        const oppUser = (
+          await getDoc(doc(firestore, "users", rivalId))
+        ).data() as GameUser;
+        rivalUnsub.current = onSnapshot(
+          doc(firestore, "users", userId, "rivals", rivalId),
+          (doc) => {
+            setRival({
+              ...(doc.data() as Rival),
+              opp: oppUser,
+            });
+          }
+        );
+      };
+      initialize();
+      return () => rivalUnsub.current();
+    }
+  }, [userId, rivalId]);
+
+  return { us, rival };
 }
